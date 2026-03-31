@@ -9,10 +9,12 @@ class FeedScreen extends StatelessWidget {
   const FeedScreen({
     super.key,
     required this.experiences,
+    this.onExperienceTap,
     this.showMyPostsEmptyMessage = false,
   });
 
   final List<Experience> experiences;
+  final void Function(Experience experience)? onExperienceTap;
   final bool showMyPostsEmptyMessage;
 
   @override
@@ -64,6 +66,9 @@ class FeedScreen extends StatelessWidget {
         return ExperienceCard(
           experience: experience,
           subtitle: formatStoryDate(experience.createdAt),
+          onTap: onExperienceTap != null
+              ? () => onExperienceTap!(experience)
+              : null,
         );
       },
     );

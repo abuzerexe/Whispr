@@ -52,4 +52,19 @@ abstract final class AppStrings {
 
   static String composeBodyCharactersLeft(int remaining, int maxChars) =>
       'Story: $remaining characters left (max $maxChars)';
+
+  static const String detailCommentsHeading = 'Comments';
+
+  static const String detailNoComments = 'No comments yet. Add one below.';
+
+  static const String detailCommentHint = 'Write a comment…';
+
+  static const String detailCommentPost = 'Post';
+
+  static const String validationCommentEmpty = 'Please write a comment.';
+
+  static String validationCommentTooLong(int maxChars) =>
+      'Comment is too long (max $maxChars characters).';
+
+  static String detailCommentCount(int n) => '$n comment${n == 1 ? '' : 's'}';
 }

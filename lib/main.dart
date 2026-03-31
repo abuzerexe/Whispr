@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'constants/app_strings.dart';
 import 'models/experience.dart';
 import 'screens/compose_screen.dart';
+import 'screens/experience_detail_screen.dart';
 import 'screens/feed_screen.dart';
 import 'utils/anonymous_name.dart';
 
@@ -17,6 +18,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: AppStrings.appTitle,
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFF1B5E20),
@@ -68,6 +70,18 @@ class _StoryHomePageState extends State<StoryHomePage> {
     );
   }
 
+  void _openDetail(Experience experience) {
+    Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (BuildContext context) => ExperienceDetailScreen(
+          experience: experience,
+          sessionAuthorHandle: _sessionAuthorHandle,
+          onAddComment: (comment) => experience.comments.add(comment),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -77,6 +91,7 @@ class _StoryHomePageState extends State<StoryHomePage> {
       ),
       body: FeedScreen(
         experiences: _visibleExperiences,
+        onExperienceTap: _openDetail,
         showMyPostsEmptyMessage: _sectionIndex == 1,
       ),
       floatingActionButton: FloatingActionButton(
