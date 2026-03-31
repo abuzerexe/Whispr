@@ -1,10 +1,18 @@
 import '../models/experience.dart';
 
 /// Builds three in-memory demo stories: two “other” authors and one using [sessionHandle].
+/// Uses times near [DateTime.now] so feed labels look like “today”, “yesterday”, etc.
 List<Experience> buildDemoExperiences(String sessionHandle) {
-  final t0 = DateTime(2024, 1, 10, 9, 0);
-  final t1 = DateTime(2024, 1, 10, 10, 0);
-  final t2 = DateTime(2024, 1, 10, 11, 0);
+  final now = DateTime.now();
+  final startOfToday = DateTime(now.year, now.month, now.day);
+
+  final tMine = now.subtract(const Duration(hours: 2, minutes: 12));
+  final tB = startOfToday
+      .subtract(const Duration(days: 1))
+      .add(const Duration(hours: 15, minutes: 40));
+  final tA = startOfToday
+      .subtract(const Duration(days: 3))
+      .add(const Duration(hours: 11, minutes: 5));
 
   return [
     Experience(
@@ -12,21 +20,21 @@ List<Experience> buildDemoExperiences(String sessionHandle) {
       authorHandle: sessionHandle,
       title: 'Seed: My session story',
       body: 'This one uses your session label so it appears under My posts.',
-      createdAt: t2,
+      createdAt: tMine,
     ),
     Experience(
       id: 'demo-seed-b',
       authorHandle: 'Anonymous DemoReader204',
       title: 'Seed: Stranger on the train',
       body: 'A short demo story from another anonymous voice.',
-      createdAt: t1,
+      createdAt: tB,
     ),
     Experience(
       id: 'demo-seed-a',
       authorHandle: 'Anonymous DemoWatcher718',
       title: 'Seed: Late night café',
       body: 'Another demo card for the shared feed.',
-      createdAt: t0,
+      createdAt: tA,
     ),
   ];
 }
