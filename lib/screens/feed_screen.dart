@@ -9,12 +9,16 @@ class FeedScreen extends StatelessWidget {
   const FeedScreen({
     super.key,
     required this.experiences,
+    required this.sessionAuthorHandle,
     this.onExperienceTap,
+    this.onDismissOwnExperience,
     this.showMyPostsEmptyMessage = false,
   });
 
   final List<Experience> experiences;
+  final String sessionAuthorHandle;
   final void Function(Experience experience)? onExperienceTap;
+  final void Function(Experience experience)? onDismissOwnExperience;
   final bool showMyPostsEmptyMessage;
 
   @override
@@ -63,13 +67,35 @@ class FeedScreen extends StatelessWidget {
       itemCount: experiences.length,
       itemBuilder: (context, index) {
         final experience = experiences[index];
-        return ExperienceCard(
+        final card = ExperienceCard(
+          key: ValueKey<String>('card_${experience.id}'),
           experience: experience,
           subtitle: formatStoryDate(experience.createdAt),
           onTap: onExperienceTap != null
               ? () => onExperienceTap!(experience)
               : null,
         );
+
+        final isOwn = experience.authorHandle == sessionAuthorHandle;
+        if (isOwn && onDismissOwnExperience != null) {
+          return Dismissible(
+            key: ValueKey<String>('dismiss_${experience.id}'),
+            direction: DismissDirection.endToStart,
+            background: Container(
+              color: Theme.of(context).colorScheme.errorContainer,
+              alignment: Alignment.centerRight,
+              padding: const EdgeInsets.only(right: 24),
+              child: Icon(
+                Icons.delete_outline,
+                color: Theme.of(context).colorScheme.onErrorContainer,
+              ),
+            ),
+            child: card,
+            onDismissed: (_) => onDismissOwnExperience!(experience),
+          );
+        }
+
+        return card;
       },
     );
   }

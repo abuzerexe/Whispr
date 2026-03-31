@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'constants/app_strings.dart';
+import 'data/demo_seed.dart';
 import 'models/experience.dart';
 import 'screens/compose_screen.dart';
 import 'screens/experience_detail_screen.dart';
@@ -8,11 +9,17 @@ import 'screens/feed_screen.dart';
 import 'utils/anonymous_name.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const MyApp(seedDemoData: true));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({
+    super.key,
+    this.seedDemoData = false,
+  });
+
+  /// When true, [StoryHomePage] starts with a few demo stories (still in-memory only).
+  final bool seedDemoData;
 
   @override
   Widget build(BuildContext context) {
@@ -25,13 +32,18 @@ class MyApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      home: const StoryHomePage(),
+      home: StoryHomePage(seedDemoData: seedDemoData),
     );
   }
 }
 
 class StoryHomePage extends StatefulWidget {
-  const StoryHomePage({super.key});
+  const StoryHomePage({
+    super.key,
+    this.seedDemoData = false,
+  });
+
+  final bool seedDemoData;
 
   @override
   State<StoryHomePage> createState() => _StoryHomePageState();
@@ -46,6 +58,9 @@ class _StoryHomePageState extends State<StoryHomePage> {
   void initState() {
     super.initState();
     _sessionAuthorHandle = generateAnonymousName();
+    if (widget.seedDemoData) {
+      _experiences.addAll(buildDemoExperiences(_sessionAuthorHandle));
+    }
   }
 
   List<Experience> get _visibleExperiences {
@@ -82,6 +97,12 @@ class _StoryHomePageState extends State<StoryHomePage> {
     );
   }
 
+  void _removeExperience(Experience experience) {
+    setState(() {
+      _experiences.removeWhere((e) => e.id == experience.id);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -91,7 +112,9 @@ class _StoryHomePageState extends State<StoryHomePage> {
       ),
       body: FeedScreen(
         experiences: _visibleExperiences,
+        sessionAuthorHandle: _sessionAuthorHandle,
         onExperienceTap: _openDetail,
+        onDismissOwnExperience: _removeExperience,
         showMyPostsEmptyMessage: _sectionIndex == 1,
       ),
       floatingActionButton: FloatingActionButton(
