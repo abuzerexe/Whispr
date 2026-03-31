@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'models/experience.dart';
+import 'screens/compose_screen.dart';
 import 'screens/feed_screen.dart';
 
 void main() {
@@ -35,6 +36,18 @@ class StoryHomePage extends StatefulWidget {
 class _StoryHomePageState extends State<StoryHomePage> {
   final List<Experience> _experiences = [];
 
+  void _openCompose() {
+    Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (BuildContext context) => ComposeScreen(
+          onAddExperience: (Experience e) {
+            setState(() => _experiences.insert(0, e));
+          },
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -43,6 +56,11 @@ class _StoryHomePageState extends State<StoryHomePage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       body: FeedScreen(experiences: _experiences),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _openCompose,
+        tooltip: 'Share an experience',
+        child: const Icon(Icons.edit_note),
+      ),
     );
   }
 }
