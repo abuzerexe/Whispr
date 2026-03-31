@@ -3,12 +3,14 @@ class Experience {
   const Experience({
     required this.id,
     required this.authorHandle,
+    required this.title,
     required this.body,
     required this.createdAt,
   });
 
   final String id;
   final String authorHandle;
+  final String title;
   final String body;
   final DateTime createdAt;
 }

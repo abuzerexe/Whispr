@@ -2,29 +2,29 @@ import 'package:flutter/material.dart';
 
 import '../constants/app_strings.dart';
 import '../models/experience.dart';
+import '../utils/date_format.dart';
 import '../widgets/experience_card.dart';
-
-String formatStoryDate(DateTime dateTime) {
-  final local = dateTime.toLocal();
-  final y = local.year.toString().padLeft(4, '0');
-  final m = local.month.toString().padLeft(2, '0');
-  final d = local.day.toString().padLeft(2, '0');
-  final h = local.hour.toString().padLeft(2, '0');
-  final min = local.minute.toString().padLeft(2, '0');
-  return '$y-$m-$d $h:$min';
-}
 
 class FeedScreen extends StatelessWidget {
   const FeedScreen({
     super.key,
     required this.experiences,
+    this.showMyPostsEmptyMessage = false,
   });
 
   final List<Experience> experiences;
+  final bool showMyPostsEmptyMessage;
 
   @override
   Widget build(BuildContext context) {
     if (experiences.isEmpty) {
+      final title = showMyPostsEmptyMessage
+          ? AppStrings.feedEmptyMyPostsTitle
+          : AppStrings.feedEmptyTitle;
+      final body = showMyPostsEmptyMessage
+          ? AppStrings.feedEmptyMyPostsBody
+          : AppStrings.feedEmptyBody;
+
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(32),
@@ -32,19 +32,19 @@ class FeedScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
-                Icons.forum_outlined,
+                showMyPostsEmptyMessage ? Icons.person_outline : Icons.forum_outlined,
                 size: 72,
                 color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
               ),
               const SizedBox(height: 24),
               Text(
-                AppStrings.feedEmptyTitle,
+                title,
                 style: Theme.of(context).textTheme.titleLarge,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),
               Text(
-                AppStrings.feedEmptyBody,
+                body,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),

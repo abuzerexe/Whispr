@@ -1,96 +1,83 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 
 import '../constants/app_strings.dart';
 import '../models/experience.dart';
 
-const int _maxStoryLength = 2000;
+const int _maxTitleLength = 120;
+const int _maxBodyLength = 2000;
 
-final List<String> _adjectives = [
-  'Quiet',
-  'Curious',
-  'Wandering',
-  'Thoughtful',
-  'Bold',
-  'Gentle',
-  'Restless',
-  'Sleepy',
-  'Hopeful',
-  'Lost',
-];
-
-final List<String> _nouns = [
-  'Traveler',
-  'Student',
-  'Dreamer',
-  'Stranger',
-  'Local',
-  'NightOwl',
-  'EarlyBird',
-  'Storyteller',
-  'Watcher',
-  'Wanderer',
-];
-
-bool isValidStory(String text) {
-  final t = text.trim();
-  return t.isNotEmpty && t.length <= _maxStoryLength;
-}
-
-String? storyValidationError(String text) {
+String? titleValidationError(String text) {
   final t = text.trim();
   if (t.isEmpty) {
-    return AppStrings.validationEmpty;
+    return AppStrings.validationTitleEmpty;
   }
-  if (t.length > _maxStoryLength) {
-    return AppStrings.validationTooLong(_maxStoryLength);
+  if (t.length > _maxTitleLength) {
+    return AppStrings.validationTitleTooLong(_maxTitleLength);
   }
   return null;
 }
 
-String generateAnonymousName() {
-  final random = Random();
-  final a = _adjectives[random.nextInt(_adjectives.length)].trim();
-  final n = _nouns[random.nextInt(_nouns.length)];
-  final suffix = random.nextInt(900) + 100;
-  return 'Anonymous $a$n$suffix';
+String? bodyValidationError(String text) {
+  final t = text.trim();
+  if (t.isEmpty) {
+    return AppStrings.validationBodyEmpty;
+  }
+  if (t.length > _maxBodyLength) {
+    return AppStrings.validationBodyTooLong(_maxBodyLength);
+  }
+  return null;
 }
+
+bool isValidTitle(String text) => titleValidationError(text) == null;
+
+bool isValidBody(String text) => bodyValidationError(text) == null;
+
+bool isValidCompose(String title, String body) =>
+    isValidTitle(title) && isValidBody(body);
 
 class ComposeScreen extends StatefulWidget {
   const ComposeScreen({
     super.key,
     required this.onAddExperience,
+    required this.authorHandle,
   });
 
   final void Function(Experience experience) onAddExperience;
+  final String authorHandle;
 
   @override
   State<ComposeScreen> createState() => _ComposeScreenState();
 }
 
 class _ComposeScreenState extends State<ComposeScreen> {
-  final TextEditingController _controller = TextEditingController();
-  String? _errorText;
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _bodyController = TextEditingController();
+  String? _titleError;
+  String? _bodyError;
 
   @override
   void dispose() {
-    _controller.dispose();
+    _titleController.dispose();
+    _bodyController.dispose();
     super.dispose();
   }
 
   void _submit() {
-    final body = _controller.text;
-    final err = storyValidationError(body);
-    if (err != null) {
-      setState(() => _errorText = err);
+    final titleErr = titleValidationError(_titleController.text);
+    final bodyErr = bodyValidationError(_bodyController.text);
+    if (titleErr != null || bodyErr != null) {
+      setState(() {
+        _titleError = titleErr;
+        _bodyError = bodyErr;
+      });
       return;
     }
 
     final experience = Experience(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
-      authorHandle: generateAnonymousName(),
-      body: body.trim(),
+      authorHandle: widget.authorHandle,
+      title: _titleController.text.trim(),
+      body: _bodyController.text.trim(),
       createdAt: DateTime.now(),
     );
 
@@ -100,7 +87,8 @@ class _ComposeScreenState extends State<ComposeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final remaining = _maxStoryLength - _controller.text.length;
+    final titleRemaining = _maxTitleLength - _titleController.text.length;
+    final bodyRemaining = _maxBodyLength - _bodyController.text.length;
 
     return Scaffold(
       appBar: AppBar(
@@ -120,34 +108,62 @@ class _ComposeScreenState extends State<ComposeScreen> {
                     ),
               ),
               const SizedBox(height: 16),
+              TextField(
+                key: const Key('compose_title_field'),
+                controller: _titleController,
+                textCapitalization: TextCapitalization.sentences,
+                decoration: InputDecoration(
+                  hintText: AppStrings.composeTitleHint,
+                  border: const OutlineInputBorder(),
+                  errorText: _titleError,
+                ),
+                onChanged: (_) {
+                  setState(() {
+                    if (_titleError != null) {
+                      _titleError = titleValidationError(_titleController.text);
+                    }
+                  });
+                },
+              ),
+              const SizedBox(height: 6),
+              Text(
+                AppStrings.composeTitleCharactersLeft(
+                  titleRemaining.clamp(0, _maxTitleLength),
+                  _maxTitleLength,
+                ),
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+              ),
+              const SizedBox(height: 16),
               Expanded(
                 child: TextField(
-                  controller: _controller,
+                  key: const Key('compose_body_field'),
+                  controller: _bodyController,
                   maxLines: null,
                   expands: true,
                   textAlignVertical: TextAlignVertical.top,
+                  textCapitalization: TextCapitalization.sentences,
                   decoration: InputDecoration(
                     alignLabelWithHint: true,
-                    hintText: AppStrings.composeHint,
+                    hintText: AppStrings.composeBodyHint,
                     border: const OutlineInputBorder(),
-                    errorText: _errorText,
+                    errorText: _bodyError,
                   ),
                   onChanged: (_) {
-                    if (_errorText != null) {
-                      setState(() {
-                        _errorText = storyValidationError(_controller.text);
-                      });
-                    } else {
-                      setState(() {});
-                    }
+                    setState(() {
+                      if (_bodyError != null) {
+                        _bodyError = bodyValidationError(_bodyController.text);
+                      }
+                    });
                   },
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 6),
               Text(
-                AppStrings.composeCharactersLeft(
-                  remaining.clamp(0, _maxStoryLength),
-                  _maxStoryLength,
+                AppStrings.composeBodyCharactersLeft(
+                  bodyRemaining.clamp(0, _maxBodyLength),
+                  _maxBodyLength,
                 ),
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -165,7 +181,12 @@ class _ComposeScreenState extends State<ComposeScreen> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: FilledButton(
-                      onPressed: isValidStory(_controller.text) ? _submit : null,
+                      onPressed: isValidCompose(
+                        _titleController.text,
+                        _bodyController.text,
+                      )
+                          ? _submit
+                          : null,
                       child: const Text(AppStrings.composeShare),
                     ),
                   ),
