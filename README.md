@@ -1,6 +1,6 @@
 # proj
 
-A new Flutter project.
+An app where people can share their past experiences without revealing their identity.
 
 ## Getting Started
 
