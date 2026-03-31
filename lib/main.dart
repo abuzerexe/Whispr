@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'constants/app_strings.dart';
 import 'models/experience.dart';
 import 'screens/compose_screen.dart';
 import 'screens/feed_screen.dart';
@@ -14,7 +15,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Anonymous experiences',
+      title: AppStrings.appTitle,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFF1B5E20),
@@ -52,13 +53,13 @@ class _StoryHomePageState extends State<StoryHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Anonymous experiences'),
+        title: const Text(AppStrings.homeAppBarTitle),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       body: FeedScreen(experiences: _experiences),
       floatingActionButton: FloatingActionButton(
         onPressed: _openCompose,
-        tooltip: 'Share an experience',
+        tooltip: AppStrings.shareFabTooltip,
         child: const Icon(Icons.edit_note),
       ),
     );

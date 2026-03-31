@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+import '../constants/app_strings.dart';
 import '../models/experience.dart';
 
 const int _maxStoryLength = 2000;
@@ -40,10 +41,10 @@ bool isValidStory(String text) {
 String? storyValidationError(String text) {
   final t = text.trim();
   if (t.isEmpty) {
-    return 'Please write something before sharing.';
+    return AppStrings.validationEmpty;
   }
   if (t.length > _maxStoryLength) {
-    return 'Story is too long (max $_maxStoryLength characters).';
+    return AppStrings.validationTooLong(_maxStoryLength);
   }
   return null;
 }
@@ -103,7 +104,7 @@ class _ComposeScreenState extends State<ComposeScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Share anonymously'),
+        title: const Text(AppStrings.composeAppBarTitle),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       body: SafeArea(
@@ -113,7 +114,7 @@ class _ComposeScreenState extends State<ComposeScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'Your name stays hidden. Only a random label is shown with your story.',
+                AppStrings.composePrivacyNotice,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
@@ -127,7 +128,7 @@ class _ComposeScreenState extends State<ComposeScreen> {
                   textAlignVertical: TextAlignVertical.top,
                   decoration: InputDecoration(
                     alignLabelWithHint: true,
-                    hintText: 'Write about a past experience…',
+                    hintText: AppStrings.composeHint,
                     border: const OutlineInputBorder(),
                     errorText: _errorText,
                   ),
@@ -144,7 +145,10 @@ class _ComposeScreenState extends State<ComposeScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                '${remaining.clamp(0, _maxStoryLength)} characters left (max $_maxStoryLength)',
+                AppStrings.composeCharactersLeft(
+                  remaining.clamp(0, _maxStoryLength),
+                  _maxStoryLength,
+                ),
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
@@ -155,14 +159,14 @@ class _ComposeScreenState extends State<ComposeScreen> {
                   Expanded(
                     child: OutlinedButton(
                       onPressed: () => Navigator.of(context).pop(),
-                      child: const Text('Cancel'),
+                      child: const Text(AppStrings.composeCancel),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: FilledButton(
                       onPressed: isValidStory(_controller.text) ? _submit : null,
-                      child: const Text('Share'),
+                      child: const Text(AppStrings.composeShare),
                     ),
                   ),
                 ],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../constants/app_strings.dart';
 import '../models/experience.dart';
 import '../widgets/experience_card.dart';
 
@@ -37,14 +38,13 @@ class FeedScreen extends StatelessWidget {
               ),
               const SizedBox(height: 24),
               Text(
-                'No stories yet',
+                AppStrings.feedEmptyTitle,
                 style: Theme.of(context).textTheme.titleLarge,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),
               Text(
-                'Tap the button to share a past experience anonymously. '
-                'Nothing is saved once you close the app.',
+                AppStrings.feedEmptyBody,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
