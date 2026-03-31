@@ -4,6 +4,9 @@ abstract final class AppStrings {
 
   static const String appTitle = 'Anonymous experiences';
 
+  static const String splashTagline =
+      'Share experiences. Stay anonymous. All local—nothing is saved after you close the app.';
+
   static const String homeAppBarTitle = appTitle;
 
   static const String shareFabTooltip = 'Share an experience';
@@ -61,10 +64,31 @@ abstract final class AppStrings {
 
   static const String detailCommentPost = 'Post';
 
+  static const String detailCommentDeleteTooltip = 'Delete your comment';
+
   static const String validationCommentEmpty = 'Please write a comment.';
 
   static String validationCommentTooLong(int maxChars) =>
       'Comment is too long (max $maxChars characters).';
 
   static String detailCommentCount(int n) => '$n comment${n == 1 ? '' : 's'}';
+
+  static const String searchHint = 'Search titles and stories…';
+
+  static const String feedSearchEmptyTitle = 'No matches';
+
+  static const String feedSearchEmptyBody =
+      'Try different words or clear the search box.';
+
+  static const String sortNewestTooltip = 'Sort: newest first';
+
+  static const String sortOldestTooltip = 'Sort: oldest first';
+
+  static const String snackStoryShared = 'Story shared.';
+
+  static const String snackStoryRemoved = 'Story removed from this device.';
+
+  static const String snackCommentPosted = 'Comment posted.';
+
+  static const String snackCommentRemoved = 'Comment removed.';
 }

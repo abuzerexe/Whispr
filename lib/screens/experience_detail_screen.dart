@@ -63,6 +63,18 @@ class _ExperienceDetailScreenState extends State<ExperienceDetailScreen> {
     setState(() {
       _commentError = null;
     });
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text(AppStrings.snackCommentPosted)),
+    );
+  }
+
+  void _deleteOwnComment(Comment c) {
+    setState(() {
+      widget.experience.comments.removeWhere((x) => x.id == c.id);
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text(AppStrings.snackCommentRemoved)),
+    );
   }
 
   @override
@@ -166,6 +178,12 @@ class _ExperienceDetailScreenState extends State<ExperienceDetailScreen> {
                                       color: theme.colorScheme.onSurfaceVariant,
                                     ),
                                   ),
+                                  if (c.authorHandle == widget.sessionAuthorHandle)
+                                    IconButton(
+                                      icon: const Icon(Icons.delete_outline),
+                                      tooltip: AppStrings.detailCommentDeleteTooltip,
+                                      onPressed: () => _deleteOwnComment(c),
+                                    ),
                                 ],
                               ),
                               const SizedBox(height: 6),

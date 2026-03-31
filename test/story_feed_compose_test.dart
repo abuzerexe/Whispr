@@ -6,7 +6,9 @@ import 'package:proj/main.dart';
 
 void main() {
   testWidgets('empty feed opens compose with correct title', (WidgetTester tester) async {
-    await tester.pumpWidget(const MyApp(seedDemoData: false));
+    await tester.pumpWidget(
+      const MyApp(seedDemoData: false, skipSplash: true),
+    );
 
     expect(find.text(AppStrings.feedEmptyTitle), findsOneWidget);
 
@@ -20,7 +22,9 @@ void main() {
     const sampleTitle = 'The night bus';
     const sampleBody = 'Something unforgettable happened on the way home.';
 
-    await tester.pumpWidget(const MyApp(seedDemoData: false));
+    await tester.pumpWidget(
+      const MyApp(seedDemoData: false, skipSplash: true),
+    );
 
     await tester.tap(find.byType(FloatingActionButton));
     await tester.pumpAndSettle();
@@ -38,7 +42,9 @@ void main() {
   });
 
   testWidgets('My posts tab shows only session stories with demo seed', (WidgetTester tester) async {
-    await tester.pumpWidget(const MyApp(seedDemoData: true));
+    await tester.pumpWidget(
+      const MyApp(seedDemoData: true, skipSplash: true),
+    );
     await tester.pumpAndSettle();
 
     expect(find.text('Seed: My session story'), findsOneWidget);
@@ -54,7 +60,9 @@ void main() {
   });
 
   testWidgets('tap story opens detail and can post a comment', (WidgetTester tester) async {
-    await tester.pumpWidget(const MyApp(seedDemoData: true));
+    await tester.pumpWidget(
+      const MyApp(seedDemoData: true, skipSplash: true),
+    );
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('Seed: My session story'));
@@ -76,7 +84,9 @@ void main() {
   });
 
   testWidgets('swipe-dismiss removes only own story from feed', (WidgetTester tester) async {
-    await tester.pumpWidget(const MyApp(seedDemoData: true));
+    await tester.pumpWidget(
+      const MyApp(seedDemoData: true, skipSplash: true),
+    );
     await tester.pumpAndSettle();
 
     expect(find.byKey(const ValueKey<String>('dismiss_demo-seed-mine')), findsOneWidget);
@@ -93,5 +103,20 @@ void main() {
 
     expect(find.text('Seed: Stranger on the train'), findsOneWidget);
     expect(find.text('Seed: Late night café'), findsOneWidget);
+  });
+
+  testWidgets('splash shows tagline then navigates to home', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MyApp(seedDemoData: false, skipSplash: false),
+    );
+    await tester.pump();
+
+    expect(find.text(AppStrings.splashTagline), findsOneWidget);
+
+    await tester.pump(const Duration(milliseconds: 1900));
+    await tester.pumpAndSettle();
+
+    expect(find.text(AppStrings.feedEmptyTitle), findsOneWidget);
+    expect(find.text(AppStrings.splashTagline), findsNothing);
   });
 }

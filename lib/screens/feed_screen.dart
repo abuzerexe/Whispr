@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../constants/app_strings.dart';
 import '../models/experience.dart';
-import '../utils/date_format.dart';
+import '../utils/date_format.dart' show formatFeedTimestamp;
 import '../widgets/experience_card.dart';
 
 class FeedScreen extends StatelessWidget {
@@ -13,6 +13,7 @@ class FeedScreen extends StatelessWidget {
     this.onExperienceTap,
     this.onDismissOwnExperience,
     this.showMyPostsEmptyMessage = false,
+    this.showNoSearchResults = false,
   });
 
   final List<Experience> experiences;
@@ -20,10 +21,43 @@ class FeedScreen extends StatelessWidget {
   final void Function(Experience experience)? onExperienceTap;
   final void Function(Experience experience)? onDismissOwnExperience;
   final bool showMyPostsEmptyMessage;
+  final bool showNoSearchResults;
 
   @override
   Widget build(BuildContext context) {
     if (experiences.isEmpty) {
+      if (showNoSearchResults) {
+        return Center(
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.search_off_outlined,
+                  size: 72,
+                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  AppStrings.feedSearchEmptyTitle,
+                  style: Theme.of(context).textTheme.titleLarge,
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  AppStrings.feedSearchEmptyBody,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+
       final title = showMyPostsEmptyMessage
           ? AppStrings.feedEmptyMyPostsTitle
           : AppStrings.feedEmptyTitle;
@@ -70,7 +104,7 @@ class FeedScreen extends StatelessWidget {
         final card = ExperienceCard(
           key: ValueKey<String>('card_${experience.id}'),
           experience: experience,
-          subtitle: formatStoryDate(experience.createdAt),
+          subtitle: formatFeedTimestamp(experience.createdAt),
           onTap: onExperienceTap != null
               ? () => onExperienceTap!(experience)
               : null,

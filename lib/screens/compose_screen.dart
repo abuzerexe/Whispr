@@ -82,7 +82,7 @@ class _ComposeScreenState extends State<ComposeScreen> {
     );
 
     widget.onAddExperience(experience);
-    Navigator.of(context).pop();
+    Navigator.of(context).pop(true);
   }
 
   @override
@@ -174,7 +174,7 @@ class _ComposeScreenState extends State<ComposeScreen> {
                 children: [
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: () => Navigator.of(context).pop(),
+                      onPressed: () => Navigator.of(context).pop(false),
                       child: const Text(AppStrings.composeCancel),
                     ),
                   ),
