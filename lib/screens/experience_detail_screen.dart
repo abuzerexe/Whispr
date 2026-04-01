@@ -24,13 +24,17 @@ class ExperienceDetailScreen extends StatefulWidget {
   const ExperienceDetailScreen({
     super.key,
     required this.experience,
+    required this.sessionUserId,
     required this.sessionAuthorHandle,
     required this.onAddComment,
+    this.onLogout,
   });
 
   final Experience experience;
+  final String sessionUserId;
   final String sessionAuthorHandle;
   final void Function(Comment comment) onAddComment;
+  final VoidCallback? onLogout;
 
   @override
   State<ExperienceDetailScreen> createState() => _ExperienceDetailScreenState();
@@ -54,6 +58,7 @@ class _ExperienceDetailScreenState extends State<ExperienceDetailScreen> {
     }
     final comment = Comment(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
+      ownerUserId: widget.sessionUserId,
       authorHandle: widget.sessionAuthorHandle,
       body: _commentController.text.trim(),
       createdAt: DateTime.now(),
@@ -91,6 +96,14 @@ class _ExperienceDetailScreenState extends State<ExperienceDetailScreen> {
           overflow: TextOverflow.ellipsis,
         ),
         backgroundColor: theme.colorScheme.inversePrimary,
+        actions: [
+          if (widget.onLogout != null)
+            IconButton(
+              tooltip: AppStrings.authLogoutTooltip,
+              onPressed: widget.onLogout,
+              icon: const Icon(Icons.logout),
+            ),
+        ],
       ),
       body: SafeArea(
         child: Column(
@@ -178,7 +191,7 @@ class _ExperienceDetailScreenState extends State<ExperienceDetailScreen> {
                                       color: theme.colorScheme.onSurfaceVariant,
                                     ),
                                   ),
-                                  if (c.authorHandle == widget.sessionAuthorHandle)
+                                  if (c.ownerUserId == widget.sessionUserId)
                                     IconButton(
                                       icon: const Icon(Icons.delete_outline),
                                       tooltip: AppStrings.detailCommentDeleteTooltip,
@@ -202,6 +215,7 @@ class _ExperienceDetailScreenState extends State<ExperienceDetailScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   TextField(
+                    key: const Key('detail_comment_field'),
                     controller: _commentController,
                     maxLines: 3,
                     minLines: 2,
@@ -222,6 +236,7 @@ class _ExperienceDetailScreenState extends State<ExperienceDetailScreen> {
                   ),
                   const SizedBox(height: 8),
                   FilledButton(
+                    key: const Key('detail_post_comment'),
                     onPressed: _isValidComment(_commentController.text)
                         ? _postComment
                         : null,

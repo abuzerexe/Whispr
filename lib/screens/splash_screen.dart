@@ -1,41 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../constants/app_strings.dart';
-import 'story_home_page.dart';
 
-/// Brief branded screen shown before [StoryHomePage] (in-app only; no extra packages).
-class SplashScreen extends StatefulWidget {
-  const SplashScreen({
-    super.key,
-    required this.seedDemoData,
-  });
-
-  final bool seedDemoData;
-
-  @override
-  State<SplashScreen> createState() => _SplashScreenState();
-}
-
-class _SplashScreenState extends State<SplashScreen> {
-  static const Duration _displayDuration = Duration(milliseconds: 1800);
-
-  @override
-  void initState() {
-    super.initState();
-    _goNext();
-  }
-
-  Future<void> _goNext() async {
-    await Future<void>.delayed(_displayDuration);
-    if (!mounted) return;
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute<void>(
-        builder: (BuildContext context) => StoryHomePage(
-          seedDemoData: widget.seedDemoData,
-        ),
-      ),
-    );
-  }
+class SplashScreen extends StatelessWidget {
+  const SplashScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

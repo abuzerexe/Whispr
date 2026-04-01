@@ -9,7 +9,7 @@ class FeedScreen extends StatelessWidget {
   const FeedScreen({
     super.key,
     required this.experiences,
-    required this.sessionAuthorHandle,
+    required this.sessionUserId,
     this.onExperienceTap,
     this.onDismissOwnExperience,
     this.showMyPostsEmptyMessage = false,
@@ -17,7 +17,7 @@ class FeedScreen extends StatelessWidget {
   });
 
   final List<Experience> experiences;
-  final String sessionAuthorHandle;
+  final String sessionUserId;
   final void Function(Experience experience)? onExperienceTap;
   final void Function(Experience experience)? onDismissOwnExperience;
   final bool showMyPostsEmptyMessage;
@@ -97,7 +97,7 @@ class FeedScreen extends StatelessWidget {
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.only(top: 8, bottom: 88),
+      padding: const EdgeInsets.only(top: 12, bottom: 96),
       itemCount: experiences.length,
       itemBuilder: (context, index) {
         final experience = experiences[index];
@@ -110,7 +110,7 @@ class FeedScreen extends StatelessWidget {
               : null,
         );
 
-        final isOwn = experience.authorHandle == sessionAuthorHandle;
+        final isOwn = experience.ownerUserId == sessionUserId;
         if (isOwn && onDismissOwnExperience != null) {
           return Dismissible(
             key: ValueKey<String>('dismiss_${experience.id}'),

@@ -39,11 +39,15 @@ class ComposeScreen extends StatefulWidget {
   const ComposeScreen({
     super.key,
     required this.onAddExperience,
+    required this.ownerUserId,
     required this.authorHandle,
+    this.onLogout,
   });
 
   final void Function(Experience experience) onAddExperience;
+  final String ownerUserId;
   final String authorHandle;
+  final VoidCallback? onLogout;
 
   @override
   State<ComposeScreen> createState() => _ComposeScreenState();
@@ -75,6 +79,7 @@ class _ComposeScreenState extends State<ComposeScreen> {
 
     final experience = Experience(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
+      ownerUserId: widget.ownerUserId,
       authorHandle: widget.authorHandle,
       title: _titleController.text.trim(),
       body: _bodyController.text.trim(),
@@ -94,6 +99,14 @@ class _ComposeScreenState extends State<ComposeScreen> {
       appBar: AppBar(
         title: const Text(AppStrings.composeAppBarTitle),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        actions: [
+          if (widget.onLogout != null)
+            IconButton(
+              tooltip: AppStrings.authLogoutTooltip,
+              onPressed: widget.onLogout,
+              icon: const Icon(Icons.logout),
+            ),
+        ],
       ),
       body: SafeArea(
         child: Padding(
