@@ -31,7 +31,6 @@ String _formatTime12(DateTime t) {
   return '$hour:$min $period';
 }
 
-/// Compact line for feed cards (no ISO-style year-first date).
 String formatFeedTimestamp(DateTime dateTime) {
   final local = dateTime.toLocal();
   final now = DateTime.now();
@@ -54,7 +53,6 @@ String formatFeedTimestamp(DateTime dateTime) {
   return '${_monthsShort[local.month - 1]} ${local.day}, ${local.year}';
 }
 
-/// Slightly fuller line for story/comment headers on the detail screen.
 String formatStoryDate(DateTime dateTime) {
   final t = dateTime.toLocal();
   final now = DateTime.now();

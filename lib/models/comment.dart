@@ -1,4 +1,3 @@
-/// Anonymous reply on an experience (stored only in memory).
 class Comment {
   const Comment({
     required this.id,

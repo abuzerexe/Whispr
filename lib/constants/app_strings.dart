@@ -1,4 +1,3 @@
-/// User-visible strings for the anonymous experiences app.
 abstract final class AppStrings {
   AppStrings._();
 

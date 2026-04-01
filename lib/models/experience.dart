@@ -1,6 +1,5 @@
 import 'comment.dart';
 
-/// One anonymous story in the in-memory feed.
 class Experience {
   Experience({
     required this.id,

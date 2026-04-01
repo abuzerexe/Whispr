@@ -1,5 +1,3 @@
-/// Account for this in-memory app. [id] is stable; other fields can be edited
-/// from the profile screen (username, email, password, anonymous handle).
 class User {
   User({
     required this.id,

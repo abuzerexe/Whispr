@@ -13,14 +13,12 @@ class AuthState {
   final List<User> _users;
   User? currentUser;
 
-  /// Shared in-memory timeline for the whole app session (all users’ stories).
   final List<Experience> feedExperiences = <Experience>[];
 
   bool _demoFeedSeeded = false;
 
   List<User> get users => List<User>.unmodifiable(_users);
 
-  /// Inserts built-in demo stories once (owned by seed accounts only).
   void seedDemoFeedIfNeeded(bool enabled) {
     if (!enabled || _demoFeedSeeded) return;
     feedExperiences.addAll(buildGlobalDemoExperiencesForSeedUsers());
@@ -76,7 +74,6 @@ class AuthState {
     return _users.any((x) => x.email.toLowerCase() == e);
   }
 
-  /// Returns `null` on success, otherwise an error message.
   String? updateUsernameForCurrentUser(String next) {
     final u = currentUser;
     if (u == null) return AppStrings.profileErrorNotSignedIn;
@@ -89,7 +86,6 @@ class AuthState {
     return null;
   }
 
-  /// Returns `null` on success, otherwise an error message.
   String? changePasswordForCurrentUser({
     required String currentPassword,
     required String newPassword,

@@ -26,8 +26,6 @@ final List<String> anonymousNouns = [
   'Wanderer',
 ];
 
-/// Random display label; [entropy] should differ per account (e.g. user id) so
-/// handles are not identical across signups in the same millisecond.
 String generateAnonymousName({int? entropy}) {
   final random = Random(
     (entropy ?? DateTime.now().microsecondsSinceEpoch) ^

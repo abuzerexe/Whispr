@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../models/experience.dart';
 
-/// Preview line limits for the feed; full text is on the detail screen.
 const int kFeedTitleMaxLines = 2;
 const int kFeedBodyMaxLines = 4;
 

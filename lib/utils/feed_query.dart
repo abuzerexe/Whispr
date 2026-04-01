@@ -17,7 +17,6 @@ List<Experience> filterExperiencesBySearch(
       .toList();
 }
 
-/// When [newestFirst] is true, most recent [Experience.createdAt] is first.
 List<Experience> sortExperiencesByDate(
   List<Experience> experiences, {
   required bool newestFirst,

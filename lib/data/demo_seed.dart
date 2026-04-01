@@ -2,8 +2,6 @@ import '../models/experience.dart';
 import '../models/user.dart';
 import 'seed_users.dart';
 
-/// Two sample stories per built-in seed account ([User.id] + [User.anonymousHandle]).
-/// Home shows everyone’s posts; “My posts” filters by the signed-in user.
 List<Experience> buildGlobalDemoExperiencesForSeedUsers() {
   final users = buildSeedUsers();
   final now = DateTime.now();
