@@ -4,6 +4,7 @@ import '../constants/app_strings.dart';
 import '../models/comment.dart';
 import '../models/experience.dart';
 import '../utils/date_format.dart';
+import '../widgets/app_surface_card.dart';
 
 const int _maxCommentLength = 800;
 
@@ -85,8 +86,10 @@ class _ExperienceDetailScreenState extends State<ExperienceDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final exp = widget.experience;
     final commentCount = exp.comments.length;
+    final dateLabel = formatStoryDate(exp.createdAt);
 
     return Scaffold(
       appBar: AppBar(
@@ -95,13 +98,12 @@ class _ExperienceDetailScreenState extends State<ExperienceDetailScreen> {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
-        backgroundColor: theme.colorScheme.inversePrimary,
         actions: [
           if (widget.onLogout != null)
             IconButton(
               tooltip: AppStrings.authLogoutTooltip,
               onPressed: widget.onLogout,
-              icon: const Icon(Icons.logout),
+              icon: const Icon(Icons.logout_rounded),
             ),
         ],
       ),
@@ -111,96 +113,160 @@ class _ExperienceDetailScreenState extends State<ExperienceDetailScreen> {
           children: [
             Expanded(
               child: ListView(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
                 children: [
-                  Row(
-                    children: [
-                      Icon(Icons.person_outline, color: theme.colorScheme.primary),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          exp.authorHandle,
-                          style: theme.textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w600,
+                  AppSurfaceCard(
+                    padding: const EdgeInsets.fromLTRB(18, 18, 14, 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            CircleAvatar(
+                              radius: 20,
+                              backgroundColor: scheme.primaryContainer,
+                              child: Icon(
+                                Icons.person_rounded,
+                                size: 22,
+                                color: scheme.onPrimaryContainer,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                exp.authorHandle,
+                                style: theme.textTheme.titleSmall?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: 0.15,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                              decoration: BoxDecoration(
+                                color: scheme.surfaceContainerHigh,
+                                borderRadius: BorderRadius.circular(999),
+                              ),
+                              child: Text(
+                                dateLabel,
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  color: scheme.onSurfaceVariant,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 52, top: 16, right: 4),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                exp.title,
+                                style: theme.textTheme.headlineSmall?.copyWith(
+                                  fontWeight: FontWeight.w800,
+                                  height: 1.2,
+                                  letterSpacing: -0.3,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                exp.body,
+                                style: theme.textTheme.bodyLarge?.copyWith(
+                                  height: 1.5,
+                                  color: scheme.onSurface.withValues(alpha: 0.88),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      ),
-                      Text(
-                        formatStoryDate(exp.createdAt),
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    exp.title,
-                    style: theme.textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.w700,
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  Text(
-                    exp.body,
-                    style: theme.textTheme.bodyLarge,
-                  ),
-                  const SizedBox(height: 24),
-                  Divider(color: theme.colorScheme.outlineVariant),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 22),
                   Text(
                     '${AppStrings.detailCommentsHeading} '
                     '(${AppStrings.detailCommentCount(commentCount)})',
                     style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: -0.2,
                     ),
                   ),
                   const SizedBox(height: 12),
                   if (exp.comments.isEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
+                    AppSurfaceCard(
+                      elevation: 1,
+                      padding: const EdgeInsets.all(18),
                       child: Text(
                         AppStrings.detailNoComments,
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
+                          color: scheme.onSurfaceVariant,
+                          height: 1.35,
                         ),
                       ),
                     )
                   else
                     ...exp.comments.map(
-                      (c) => Card(
-                        margin: const EdgeInsets.only(bottom: 8),
-                        child: Padding(
-                          padding: const EdgeInsets.all(12),
+                      (c) => Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: AppSurfaceCard(
+                          elevation: 1,
+                          padding: const EdgeInsets.all(14),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
+                                  CircleAvatar(
+                                    radius: 16,
+                                    backgroundColor: scheme.secondaryContainer,
+                                    child: Icon(
+                                      Icons.chat_bubble_outline_rounded,
+                                      size: 16,
+                                      color: scheme.onSecondaryContainer,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
                                   Expanded(
                                     child: Text(
                                       c.authorHandle,
                                       style: theme.textTheme.labelLarge?.copyWith(
-                                        fontWeight: FontWeight.w600,
+                                        fontWeight: FontWeight.w700,
                                       ),
                                     ),
                                   ),
                                   Text(
                                     formatStoryDate(c.createdAt),
                                     style: theme.textTheme.labelSmall?.copyWith(
-                                      color: theme.colorScheme.onSurfaceVariant,
+                                      color: scheme.onSurfaceVariant,
+                                      fontWeight: FontWeight.w600,
                                     ),
                                   ),
                                   if (c.ownerUserId == widget.sessionUserId)
                                     IconButton(
-                                      icon: const Icon(Icons.delete_outline),
+                                      constraints: const BoxConstraints(
+                                        minWidth: 36,
+                                        minHeight: 36,
+                                      ),
+                                      padding: EdgeInsets.zero,
+                                      icon: const Icon(Icons.delete_outline_rounded, size: 22),
                                       tooltip: AppStrings.detailCommentDeleteTooltip,
                                       onPressed: () => _deleteOwnComment(c),
                                     ),
                                 ],
                               ),
-                              const SizedBox(height: 6),
-                              Text(c.body, style: theme.textTheme.bodyMedium),
+                              Padding(
+                                padding: const EdgeInsets.only(left: 42, top: 8),
+                                child: Text(
+                                  c.body,
+                                  style: theme.textTheme.bodyMedium?.copyWith(height: 1.4),
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -211,38 +277,47 @@ class _ExperienceDetailScreenState extends State<ExperienceDetailScreen> {
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  TextField(
-                    key: const Key('detail_comment_field'),
-                    controller: _commentController,
-                    maxLines: 3,
-                    minLines: 2,
-                    textCapitalization: TextCapitalization.sentences,
-                    decoration: InputDecoration(
-                      hintText: AppStrings.detailCommentHint,
-                      border: const OutlineInputBorder(),
-                      errorText: _commentError,
+              child: AppSurfaceCard(
+                elevation: 2,
+                padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    TextField(
+                      key: const Key('detail_comment_field'),
+                      controller: _commentController,
+                      maxLines: 3,
+                      minLines: 2,
+                      textCapitalization: TextCapitalization.sentences,
+                      decoration: InputDecoration(
+                        hintText: AppStrings.detailCommentHint,
+                        errorText: _commentError,
+                      ),
+                      onChanged: (_) {
+                        setState(() {
+                          if (_commentError != null) {
+                            _commentError =
+                                _commentValidationError(_commentController.text);
+                          }
+                        });
+                      },
                     ),
-                    onChanged: (_) {
-                      setState(() {
-                        if (_commentError != null) {
-                          _commentError =
-                              _commentValidationError(_commentController.text);
-                        }
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 8),
-                  FilledButton(
-                    key: const Key('detail_post_comment'),
-                    onPressed: _isValidComment(_commentController.text)
-                        ? _postComment
-                        : null,
-                    child: Text(AppStrings.detailCommentPost),
-                  ),
-                ],
+                    const SizedBox(height: 12),
+                    FilledButton(
+                      key: const Key('detail_post_comment'),
+                      onPressed: _isValidComment(_commentController.text)
+                          ? _postComment
+                          : null,
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      child: Text(AppStrings.detailCommentPost),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],

@@ -24,42 +24,57 @@ class SplashScreen extends StatelessWidget {
         child: SafeArea(
           child: Center(
             child: Padding(
-              padding: const EdgeInsets.all(32),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.forum_rounded,
-                    size: 88,
-                    color: scheme.onPrimary,
+              padding: const EdgeInsets.all(28),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: scheme.onPrimary.withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(28),
+                  border: Border.all(
+                    color: scheme.onPrimary.withValues(alpha: 0.22),
                   ),
-                  const SizedBox(height: 24),
-                  Text(
-                    AppStrings.appTitle,
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          color: scheme.onPrimary,
-                          fontWeight: FontWeight.w700,
-                        ),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    AppStrings.splashTagline,
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 40),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.forum_rounded,
+                        size: 80,
+                        color: scheme.onPrimary,
+                      ),
+                      const SizedBox(height: 22),
+                      Text(
+                        AppStrings.appTitle,
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                              color: scheme.onPrimary,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: -0.4,
+                            ),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        AppStrings.splashTagline,
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              color: scheme.onPrimary.withValues(alpha: 0.92),
+                              height: 1.35,
+                            ),
+                      ),
+                      const SizedBox(height: 36),
+                      SizedBox(
+                        width: 36,
+                        height: 36,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 3,
                           color: scheme.onPrimary.withValues(alpha: 0.9),
                         ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 48),
-                  SizedBox(
-                    width: 36,
-                    height: 36,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 3,
-                      color: scheme.onPrimary.withValues(alpha: 0.85),
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
           ),

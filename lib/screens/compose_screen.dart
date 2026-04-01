@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../constants/app_strings.dart';
 import '../models/experience.dart';
+import '../widgets/app_surface_card.dart';
 
 const int _maxTitleLength = 120;
 const int _maxBodyLength = 2000;
@@ -94,31 +95,46 @@ class _ComposeScreenState extends State<ComposeScreen> {
   Widget build(BuildContext context) {
     final titleRemaining = _maxTitleLength - _titleController.text.length;
     final bodyRemaining = _maxBodyLength - _bodyController.text.length;
+    final scheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text(AppStrings.composeAppBarTitle),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
           if (widget.onLogout != null)
             IconButton(
               tooltip: AppStrings.authLogoutTooltip,
               onPressed: widget.onLogout,
-              icon: const Icon(Icons.logout),
+              icon: const Icon(Icons.logout_rounded),
             ),
         ],
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
-                AppStrings.composePrivacyNotice,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+              AppSurfaceCard(
+                padding: const EdgeInsets.all(16),
+                elevation: 1,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(Icons.shield_outlined, color: scheme.primary, size: 22),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        AppStrings.composePrivacyNotice,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: scheme.onSurface.withValues(alpha: 0.85),
+                          height: 1.4,
+                        ),
+                      ),
                     ),
+                  ],
+                ),
               ),
               const SizedBox(height: 16),
               TextField(
@@ -127,7 +143,6 @@ class _ComposeScreenState extends State<ComposeScreen> {
                 textCapitalization: TextCapitalization.sentences,
                 decoration: InputDecoration(
                   hintText: AppStrings.composeTitleHint,
-                  border: const OutlineInputBorder(),
                   errorText: _titleError,
                 ),
                 onChanged: (_) {
@@ -144,11 +159,11 @@ class _ComposeScreenState extends State<ComposeScreen> {
                   titleRemaining.clamp(0, _maxTitleLength),
                   _maxTitleLength,
                 ),
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 14),
               Expanded(
                 child: TextField(
                   key: const Key('compose_body_field'),
@@ -160,7 +175,6 @@ class _ComposeScreenState extends State<ComposeScreen> {
                   decoration: InputDecoration(
                     alignLabelWithHint: true,
                     hintText: AppStrings.composeBodyHint,
-                    border: const OutlineInputBorder(),
                     errorText: _bodyError,
                   ),
                   onChanged: (_) {
@@ -178,9 +192,9 @@ class _ComposeScreenState extends State<ComposeScreen> {
                   bodyRemaining.clamp(0, _maxBodyLength),
                   _maxBodyLength,
                 ),
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                ),
               ),
               const SizedBox(height: 16),
               Row(
@@ -188,6 +202,12 @@ class _ComposeScreenState extends State<ComposeScreen> {
                   Expanded(
                     child: OutlinedButton(
                       onPressed: () => Navigator.of(context).pop(false),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
                       child: const Text(AppStrings.composeCancel),
                     ),
                   ),
@@ -200,6 +220,12 @@ class _ComposeScreenState extends State<ComposeScreen> {
                       )
                           ? _submit
                           : null,
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
                       child: const Text(AppStrings.composeShare),
                     ),
                   ),

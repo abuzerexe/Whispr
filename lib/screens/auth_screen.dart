@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../constants/app_strings.dart';
 import '../state/auth_state.dart';
+import '../widgets/app_surface_card.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({
@@ -115,114 +116,119 @@ class _AuthScreenState extends State<AuthScreen> {
     final title = _isLogin ? AppStrings.authLoginTab : AppStrings.authSignupTab;
     final button = _isLogin ? AppStrings.authLoginButton : AppStrings.authSignupButton;
     final scheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
 
     return Scaffold(
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 420),
-              child: Card(
-                elevation: 0,
-                color: scheme.surfaceContainerLowest,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(18),
-                  side: BorderSide(color: scheme.outlineVariant),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(18),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Icon(
-                        Icons.lock_person_rounded,
-                        size: 58,
-                        color: scheme.primary,
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        title,
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                              fontWeight: FontWeight.w700,
-                            ),
-                      ),
-                      const SizedBox(height: 16),
-                      TextField(
-                        key: const Key('auth_username_field'),
-                        controller: _usernameController,
-                        autocorrect: false,
-                        decoration: InputDecoration(
-                          hintText: _isLogin
-                              ? AppStrings.authLoginIdentifierHint
-                              : AppStrings.authUsernameHint,
-                          border: const OutlineInputBorder(),
+              child: AppSurfaceCard(
+                padding: const EdgeInsets.fromLTRB(22, 26, 22, 22),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Center(
+                      child: CircleAvatar(
+                        radius: 36,
+                        backgroundColor: scheme.primaryContainer,
+                        child: Icon(
+                          Icons.lock_person_rounded,
+                          size: 40,
+                          color: scheme.onPrimaryContainer,
                         ),
                       ),
-                      if (!_isLogin) ...[
-                        const SizedBox(height: 12),
-                        TextField(
-                          key: const Key('auth_email_field'),
-                          controller: _emailController,
-                          keyboardType: TextInputType.emailAddress,
-                          autocorrect: false,
-                          decoration: const InputDecoration(
-                            hintText: AppStrings.authEmailHint,
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                      ],
+                    ),
+                    const SizedBox(height: 18),
+                    Text(
+                      title,
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.3,
+                      ),
+                    ),
+                    const SizedBox(height: 22),
+                    TextField(
+                      key: const Key('auth_username_field'),
+                      controller: _usernameController,
+                      autocorrect: false,
+                      decoration: InputDecoration(
+                        hintText: _isLogin
+                            ? AppStrings.authLoginIdentifierHint
+                            : AppStrings.authUsernameHint,
+                      ),
+                    ),
+                    if (!_isLogin) ...[
                       const SizedBox(height: 12),
                       TextField(
-                        key: const Key('auth_password_field'),
-                        controller: _passwordController,
-                        obscureText: true,
+                        key: const Key('auth_email_field'),
+                        controller: _emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        autocorrect: false,
                         decoration: const InputDecoration(
-                          hintText: AppStrings.authPasswordHint,
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
-                      if (!_isLogin) ...[
-                        const SizedBox(height: 12),
-                        TextField(
-                          key: const Key('auth_confirm_field'),
-                          controller: _confirmController,
-                          obscureText: true,
-                          decoration: const InputDecoration(
-                            hintText: AppStrings.authConfirmPasswordHint,
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                      ],
-                      if (_error != null) ...[
-                        const SizedBox(height: 12),
-                        Text(
-                          _error!,
-                          style: TextStyle(color: Theme.of(context).colorScheme.error),
-                        ),
-                      ],
-                      const SizedBox(height: 16),
-                      FilledButton(
-                        key: const Key('auth_submit_button'),
-                        onPressed: _submit,
-                        child: Text(button),
-                      ),
-                      const SizedBox(height: 8),
-                      Align(
-                        alignment: Alignment.center,
-                        child: TextButton(
-                          key: const Key('auth_toggle_mode_button'),
-                          onPressed: () => _setMode(!_isLogin),
-                          child: Text(
-                            _isLogin
-                                ? AppStrings.authSwitchToSignup
-                                : AppStrings.authSwitchToLogin,
-                          ),
+                          hintText: AppStrings.authEmailHint,
                         ),
                       ),
                     ],
-                  ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      key: const Key('auth_password_field'),
+                      controller: _passwordController,
+                      obscureText: true,
+                      decoration: const InputDecoration(
+                        hintText: AppStrings.authPasswordHint,
+                      ),
+                    ),
+                    if (!_isLogin) ...[
+                      const SizedBox(height: 12),
+                      TextField(
+                        key: const Key('auth_confirm_field'),
+                        controller: _confirmController,
+                        obscureText: true,
+                        decoration: const InputDecoration(
+                          hintText: AppStrings.authConfirmPasswordHint,
+                        ),
+                      ),
+                    ],
+                    if (_error != null) ...[
+                      const SizedBox(height: 14),
+                      Text(
+                        _error!,
+                        style: TextStyle(
+                          color: scheme.error,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 20),
+                    FilledButton(
+                      key: const Key('auth_submit_button'),
+                      onPressed: _submit,
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      child: Text(button),
+                    ),
+                    const SizedBox(height: 6),
+                    Align(
+                      alignment: Alignment.center,
+                      child: TextButton(
+                        key: const Key('auth_toggle_mode_button'),
+                        onPressed: () => _setMode(!_isLogin),
+                        child: Text(
+                          _isLogin
+                              ? AppStrings.authSwitchToSignup
+                              : AppStrings.authSwitchToLogin,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),

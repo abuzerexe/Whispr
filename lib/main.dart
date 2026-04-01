@@ -67,20 +67,57 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+    const scaffoldWarm = Color(0xFFF3F1EC);
+    final scheme = ColorScheme.fromSeed(
+      seedColor: const Color(0xFF2A6B45),
+      brightness: Brightness.light,
+    );
+
     return MaterialApp(
       title: AppStrings.appTitle,
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF2A6B45),
-          brightness: Brightness.light,
-        ),
+        colorScheme: scheme,
         useMaterial3: true,
-        scaffoldBackgroundColor: const Color(0xFFF3F1EC),
+        scaffoldBackgroundColor: scaffoldWarm,
+        appBarTheme: AppBarTheme(
+          elevation: 0,
+          scrolledUnderElevation: 2,
+          backgroundColor: scheme.inversePrimary,
+          surfaceTintColor: Colors.transparent,
+          foregroundColor: scheme.onSurface,
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: scheme.surface,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: BorderSide(color: scheme.outlineVariant),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.9)),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: BorderSide(color: scheme.primary, width: 1.5),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: BorderSide(color: scheme.error),
+          ),
+          focusedErrorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: BorderSide(color: scheme.error, width: 1.5),
+          ),
+        ),
         cardTheme: CardThemeData(
           elevation: 0,
+          color: scheme.surface,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(18),
+            side: BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.5)),
           ),
           clipBehavior: Clip.antiAlias,
         ),
