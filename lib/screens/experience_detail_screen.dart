@@ -216,55 +216,71 @@ class _ExperienceDetailScreenState extends State<ExperienceDetailScreen> {
                         child: AppSurfaceCard(
                           elevation: 1,
                           padding: const EdgeInsets.all(14),
-                          child: Column(
+                          child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  CircleAvatar(
-                                    radius: 16,
-                                    backgroundColor: scheme.secondaryContainer,
-                                    child: Icon(
-                                      Icons.chat_bubble_outline_rounded,
-                                      size: 16,
-                                      color: scheme.onSecondaryContainer,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 10),
-                                  Expanded(
-                                    child: Text(
-                                      c.authorHandle,
-                                      style: theme.textTheme.labelLarge?.copyWith(
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                  ),
-                                  Text(
-                                    formatStoryDate(c.createdAt),
-                                    style: theme.textTheme.labelSmall?.copyWith(
-                                      color: scheme.onSurfaceVariant,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  if (c.ownerUserId == widget.sessionUserId)
-                                    IconButton(
-                                      constraints: const BoxConstraints(
-                                        minWidth: 36,
-                                        minHeight: 36,
-                                      ),
-                                      padding: EdgeInsets.zero,
-                                      icon: const Icon(Icons.delete_outline_rounded, size: 22),
-                                      tooltip: AppStrings.detailCommentDeleteTooltip,
-                                      onPressed: () => _deleteOwnComment(c),
-                                    ),
-                                ],
+                              CircleAvatar(
+                                radius: 16,
+                                backgroundColor: scheme.secondaryContainer,
+                                child: Icon(
+                                  Icons.chat_bubble_outline_rounded,
+                                  size: 16,
+                                  color: scheme.onSecondaryContainer,
+                                ),
                               ),
-                              Padding(
-                                padding: const EdgeInsets.only(left: 42, top: 8),
-                                child: Text(
-                                  c.body,
-                                  style: theme.textTheme.bodyMedium?.copyWith(height: 1.4),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            c.authorHandle,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: theme.textTheme.labelLarge?.copyWith(
+                                              fontWeight: FontWeight.w700,
+                                              height: 1.2,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          formatStoryDate(c.createdAt),
+                                          style: theme.textTheme.labelSmall?.copyWith(
+                                            color: scheme.onSurfaceVariant,
+                                            fontWeight: FontWeight.w600,
+                                            height: 1.2,
+                                          ),
+                                        ),
+                                        if (c.ownerUserId == widget.sessionUserId) ...[
+                                          const SizedBox(width: 2),
+                                          IconButton(
+                                            icon: const Icon(Icons.delete_outline_rounded, size: 20),
+                                            tooltip: AppStrings.detailCommentDeleteTooltip,
+                                            onPressed: () => _deleteOwnComment(c),
+                                            padding: EdgeInsets.zero,
+                                            constraints: const BoxConstraints.tightFor(
+                                              width: 32,
+                                              height: 32,
+                                            ),
+                                            style: IconButton.styleFrom(
+                                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                              visualDensity: VisualDensity.compact,
+                                            ),
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      c.body,
+                                      style: theme.textTheme.bodyMedium?.copyWith(height: 1.4),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
