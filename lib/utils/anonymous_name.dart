@@ -26,9 +26,13 @@ final List<String> anonymousNouns = [
   'Wanderer',
 ];
 
-/// One random label per call; session handle is created once by the home shell.
-String generateAnonymousName() {
-  final random = Random();
+/// Random display label; [entropy] should differ per account (e.g. user id) so
+/// handles are not identical across signups in the same millisecond.
+String generateAnonymousName({int? entropy}) {
+  final random = Random(
+    (entropy ?? DateTime.now().microsecondsSinceEpoch) ^
+        Object.hash(DateTime.now().microsecondsSinceEpoch, identityHashCode(anonymousAdjectives)),
+  );
   final a = anonymousAdjectives[random.nextInt(anonymousAdjectives.length)].trim();
   final n = anonymousNouns[random.nextInt(anonymousNouns.length)];
   final suffix = random.nextInt(900) + 100;
