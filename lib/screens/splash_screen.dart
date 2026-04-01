@@ -52,16 +52,44 @@ class SplashScreen extends StatelessWidget {
                               color: scheme.onPrimary,
                               fontWeight: FontWeight.w800,
                               letterSpacing: -0.4,
+                              shadows: [
+                                Shadow(
+                                  color: Colors.black.withValues(alpha: 0.22),
+                                  offset: const Offset(0, 1),
+                                  blurRadius: 8,
+                                ),
+                              ],
                             ),
                       ),
-                      const SizedBox(height: 10),
-                      Text(
-                        AppStrings.splashTagline,
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                              color: scheme.onPrimary.withValues(alpha: 0.92),
-                              height: 1.35,
+                      const SizedBox(height: 14),
+                      DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: scheme.surface.withValues(alpha: 0.94),
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.12),
+                              blurRadius: 12,
+                              offset: const Offset(0, 4),
                             ),
+                          ],
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 18,
+                            vertical: 12,
+                          ),
+                          child: Text(
+                            AppStrings.splashTagline,
+                            textAlign: TextAlign.center,
+                            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                  color: scheme.onSurface,
+                                  fontWeight: FontWeight.w600,
+                                  height: 1.4,
+                                  letterSpacing: 0.15,
+                                ),
+                          ),
+                        ),
                       ),
                       const SizedBox(height: 36),
                       SizedBox(
