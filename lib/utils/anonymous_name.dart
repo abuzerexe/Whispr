@@ -1,6 +1,6 @@
 import 'dart:math';
 
-final List<String> anonymousAdjectives = [
+final List<String> _handleAdjectives = [
   'Quiet',
   'Curious',
   'Wandering',
@@ -11,9 +11,19 @@ final List<String> anonymousAdjectives = [
   'Sleepy',
   'Hopeful',
   'Lost',
+  'Swift',
+  'Faded',
+  'Silver',
+  'Amber',
+  'Distant',
+  'Calm',
+  'Vivid',
+  'Soft',
+  'Hollow',
+  'Misty',
 ];
 
-final List<String> anonymousNouns = [
+final List<String> _handleNouns = [
   'Traveler',
   'Student',
   'Dreamer',
@@ -24,15 +34,27 @@ final List<String> anonymousNouns = [
   'Storyteller',
   'Watcher',
   'Wanderer',
+  'River',
+  'Echo',
+  'Harbor',
+  'Maple',
+  'Canvas',
+  'Pixel',
+  'Frost',
+  'Ember',
+  'Cinder',
 ];
 
 String generateAnonymousName({int? entropy}) {
   final random = Random(
     (entropy ?? DateTime.now().microsecondsSinceEpoch) ^
-        Object.hash(DateTime.now().microsecondsSinceEpoch, identityHashCode(anonymousAdjectives)),
+        Object.hash(
+          DateTime.now().microsecondsSinceEpoch,
+          identityHashCode(_handleAdjectives),
+        ),
   );
-  final a = anonymousAdjectives[random.nextInt(anonymousAdjectives.length)].trim();
-  final n = anonymousNouns[random.nextInt(anonymousNouns.length)];
+  final a = _handleAdjectives[random.nextInt(_handleAdjectives.length)].trim();
+  final n = _handleNouns[random.nextInt(_handleNouns.length)];
   final suffix = random.nextInt(900) + 100;
-  return 'Anonymous $a$n$suffix';
+  return '$a$n$suffix';
 }
