@@ -1,7 +1,7 @@
 abstract final class AppStrings {
   AppStrings._();
 
-  static const String appTitle = 'Anonymous experiences';
+  static const String appTitle = 'Whispr';
 
   static const String splashTagline = 'Share experiences. Stay anonymous.';
 
@@ -18,16 +18,16 @@ abstract final class AppStrings {
   static const String feedEmptyTitle = 'No stories yet';
 
   static const String feedEmptyBody =
-      'Tap the button to share a past experience anonymously. '
+      'Tap the button to share a past experience without revealing who you are. '
       'Nothing is saved once you close the app.';
 
   static const String feedEmptyMyPostsTitle = 'No posts from this session';
 
   static const String feedEmptyMyPostsBody =
-      'During this session your posts share one anonymous label. '
+      'During this session your posts share one display label. '
       'Add a story from the Home tab to see it listed here.';
 
-  static const String composeAppBarTitle = 'Share anonymously';
+  static const String composeAppBarTitle = 'Share a story';
 
   static const String composePrivacyNotice =
       'Your name stays hidden. Only a random label is shown with your story.';
@@ -128,9 +128,9 @@ abstract final class AppStrings {
   static const String profileDetailsSection = 'Sign-up details (read-only)';
   static const String profileCurrentUsername = 'Username';
   static const String profileReadOnlyEmailLabel = 'Email';
-  static const String profileReadOnlyHandleLabel = 'Anonymous name on posts';
+  static const String profileReadOnlyHandleLabel = 'Display name on posts';
   static const String profileReadOnlyNote =
-      'Email and anonymous name are set at sign-up and cannot be changed here.';
+      'Email and display name are set at sign-up and cannot be changed here.';
   static const String profileSaveUsername = 'Save username';
   static const String profileSecuritySection = 'Security';
   static const String profileCurrentPassword = 'Current password';

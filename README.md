@@ -1,6 +1,6 @@
-# proj
+# Whispr
 
-An app where people can share their past experiences without revealing their identity.
+Flutter app for sharing personal stories under a random display name—quiet, in-memory demo.
 
 ## Getting Started
 
