@@ -4,6 +4,7 @@ import 'comment.dart';
 class Experience {
   Experience({
     required this.id,
+    required this.ownerUserId,
     required this.authorHandle,
     required this.title,
     required this.body,
@@ -12,6 +13,7 @@ class Experience {
   }) : comments = comments ?? <Comment>[];
 
   final String id;
+  final String ownerUserId;
   final String authorHandle;
   final String title;
   final String body;
