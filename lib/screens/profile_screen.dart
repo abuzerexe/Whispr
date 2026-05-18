@@ -25,14 +25,18 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   late final TextEditingController _usernameController;
-  final TextEditingController _currentPasswordController = TextEditingController();
-  final TextEditingController _newPasswordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final _currentPasswordController = TextEditingController();
+  final _newPasswordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+
+  bool _savingUsername = false;
+  bool _changingPassword = false;
 
   @override
   void initState() {
     super.initState();
-    _usernameController = TextEditingController(text: widget.user.username);
+    _usernameController =
+        TextEditingController(text: widget.user.username);
   }
 
   @override
@@ -50,12 +54,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.dispose();
   }
 
-  void _snack(String text) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
-  }
+  void _snack(String text) =>
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(text)));
 
-  void _saveUsername() {
-    final err = widget.authState.updateUsernameForCurrentUser(_usernameController.text);
+  Future<void> _saveUsername() async {
+    setState(() => _savingUsername = true);
+    final err = await widget.authState
+        .updateUsernameForCurrentUser(_usernameController.text);
+    if (!mounted) return;
+    setState(() => _savingUsername = false);
     if (err != null) {
       _snack(err);
       return;
@@ -64,12 +72,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _snack(AppStrings.profileSaved);
   }
 
-  void _changePassword() {
-    final err = widget.authState.changePasswordForCurrentUser(
+  Future<void> _changePassword() async {
+    setState(() => _changingPassword = true);
+    final err = await widget.authState.changePasswordForCurrentUser(
       currentPassword: _currentPasswordController.text,
       newPassword: _newPasswordController.text,
       confirmPassword: _confirmPasswordController.text,
     );
+    if (!mounted) return;
+    setState(() => _changingPassword = false);
     if (err != null) {
       _snack(err);
       return;
@@ -109,20 +120,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
               TextField(
                 key: const Key('profile_username_field'),
                 controller: _usernameController,
+                enabled: !_savingUsername,
                 decoration: const InputDecoration(
                   labelText: AppStrings.profileCurrentUsername,
                 ),
               ),
               const SizedBox(height: 14),
               FilledButton(
-                onPressed: _saveUsername,
+                onPressed: _savingUsername ? null : _saveUsername,
                 style: FilledButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),
                 ),
-                child: const Text(AppStrings.profileSaveUsername),
+                child: _savingUsername
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text(AppStrings.profileSaveUsername),
               ),
             ],
           ),
@@ -158,7 +176,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
               const SizedBox(height: 18),
-              Divider(height: 1, color: scheme.outlineVariant.withValues(alpha: 0.6)),
+              Divider(
+                  height: 1,
+                  color:
+                      scheme.outlineVariant.withValues(alpha: 0.6)),
               const SizedBox(height: 18),
               Text(
                 AppStrings.profileReadOnlyHandleLabel,
@@ -189,6 +210,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 key: const Key('profile_current_password_field'),
                 controller: _currentPasswordController,
                 obscureText: true,
+                enabled: !_changingPassword,
                 decoration: const InputDecoration(
                   labelText: AppStrings.profileCurrentPassword,
                 ),
@@ -198,6 +220,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 key: const Key('profile_new_password_field'),
                 controller: _newPasswordController,
                 obscureText: true,
+                enabled: !_changingPassword,
                 decoration: const InputDecoration(
                   labelText: AppStrings.profileNewPassword,
                 ),
@@ -207,20 +230,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 key: const Key('profile_confirm_password_field'),
                 controller: _confirmPasswordController,
                 obscureText: true,
+                enabled: !_changingPassword,
                 decoration: const InputDecoration(
                   labelText: AppStrings.profileConfirmNewPassword,
                 ),
               ),
               const SizedBox(height: 16),
               FilledButton(
-                onPressed: _changePassword,
+                onPressed: _changingPassword ? null : _changePassword,
                 style: FilledButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),
                 ),
-                child: const Text(AppStrings.profileChangePassword),
+                child: _changingPassword
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text(AppStrings.profileChangePassword),
               ),
             ],
           ),
