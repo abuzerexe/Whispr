@@ -19,7 +19,7 @@ abstract final class AppStrings {
 
   static const String feedEmptyBody =
       'Tap the button to share a past experience without revealing who you are. '
-      'Your anonymous handle keeps your identity hidden.';
+      'Nothing is saved once you close the app.';
 
   static const String feedEmptyMyPostsTitle = 'No posts from this session';
 
@@ -66,10 +66,6 @@ abstract final class AppStrings {
 
   static const String detailCommentDeleteTooltip = 'Delete your comment';
 
-  static const String voteUpTooltip = 'Upvote';
-
-  static const String voteDownTooltip = 'Downvote';
-
   static const String validationCommentEmpty = 'Please write a comment.';
 
   static String validationCommentTooLong(int maxChars) =>
@@ -88,11 +84,9 @@ abstract final class AppStrings {
 
   static const String sortOldestTooltip = 'Sort: oldest first';
 
-  static const String analyticsTooltip = 'Community insights';
-
   static const String snackStoryShared = 'Story shared.';
 
-  static const String snackStoryRemoved = 'Story deleted.';
+  static const String snackStoryRemoved = 'Story removed from this device.';
 
   static const String snackCommentPosted = 'Comment posted.';
 
@@ -101,7 +95,7 @@ abstract final class AppStrings {
   static const String authLoginTab = 'Login';
   static const String authSignupTab = 'Sign up';
   static const String authUsernameHint = 'Username';
-  static const String authLoginIdentifierHint = 'Email';
+  static const String authLoginIdentifierHint = 'Username or email';
   static const String authEmailHint = 'Email';
   static const String authPasswordHint = 'Password';
   static const String authConfirmPasswordHint = 'Confirm password';
@@ -113,12 +107,6 @@ abstract final class AppStrings {
   static const String authLoggedOut = 'Logged out.';
   static const String authLoginFailed =
       'Invalid username, email, or password.';
-
-  static const String authProfileLoadFailed =
-      'Signed in but your profile did not load. Check Firestore rules and try again.';
-
-  static const String authUnexpectedError =
-      'Something went wrong. Please try again.';
   static const String authValidationUsername = 'Enter a username.';
   static const String authValidationLoginIdentifier =
       'Enter your username or email.';
@@ -128,7 +116,7 @@ abstract final class AppStrings {
   static const String authValidationEmailTaken = 'That email is already in use.';
   static const String authValidationPassword = 'Enter a password.';
   static const String authValidationPasswordShort =
-      'Password must be at least 6 characters.';
+      'Password must be at least 4 characters.';
   static const String authValidationPasswordMismatch =
       'Passwords do not match.';
   static const String authValidationUsernameTaken =

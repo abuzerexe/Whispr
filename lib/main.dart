@@ -1,68 +1,68 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import 'constants/app_strings.dart';
-import 'controllers/analytics_controller.dart';
-import 'firebase_options.dart';
+import 'data/seed_users.dart';
 import 'screens/auth_screen.dart';
 import 'screens/splash_screen.dart';
 import 'screens/story_home_page.dart';
 import 'state/auth_state.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-  // Web often hits WebChannel/firewall issues → `unavailable`; long-polling is
-  // much more reliable on shared / campus networks.
-  if (kIsWeb) {
-    FirebaseFirestore.instance.settings = const Settings(
-      webExperimentalForceLongPolling: true,
-    );
-  }
-  runApp(
-    ChangeNotifierProvider(
-      create: (_) => AnalyticsController(),
-      child: const MyApp(),
-    ),
-  );
+void main() {
+  runApp(const MyApp(seedDemoData: true));
 }
 
 class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+  const MyApp({
+    super.key,
+    this.seedDemoData = false,
+    this.skipSplash = false,
+    this.skipAuth = false,
+  });
+
+  final bool seedDemoData;
+  final bool skipSplash;
+  final bool skipAuth;
 
   @override
   State<MyApp> createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {
-  final AuthState _authState = AuthState();
-  bool _ready = false;
+  late final AuthState _authState;
+  bool _showSplash = true;
+  Timer? _splashTimer;
 
   @override
   void initState() {
     super.initState();
-    // Wait for both the splash animation and the Firebase auth check.
-    Future.wait<void>([
-      _authState.loadCurrentUser(),
-      Future<void>.delayed(const Duration(milliseconds: 1800)),
-    ]).then((_) {
-      if (!mounted) return;
-      setState(() => _ready = true);
-    });
+    _authState = AuthState(seededUsers: buildSeedUsers());
+    _showSplash = !widget.skipSplash;
+    if (widget.skipAuth) {
+      _authState.currentUser = _authState.users.first;
+    }
+    if (_showSplash) {
+      _splashTimer = Timer(const Duration(milliseconds: 1800), () {
+        if (!mounted) return;
+        setState(() => _showSplash = false);
+      });
+    }
   }
 
-  void _handleAuthenticated() => setState(() {});
+  @override
+  void dispose() {
+    _splashTimer?.cancel();
+    super.dispose();
+  }
+
+  void _handleAuthenticated() {
+    setState(() {});
+  }
 
   void _handleLogout() {
-    // Fire-and-forget: signOut clears the session, then rebuild.
-    _authState.logout().then((_) {
-      if (mounted) setState(() {});
-    });
+    _authState.logout();
+    setState(() {});
   }
 
   @override
@@ -90,16 +90,14 @@ class _MyAppState extends State<MyApp> {
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
           fillColor: scheme.surface,
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
             borderSide: BorderSide(color: scheme.outlineVariant),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
-            borderSide:
-                BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.9)),
+            borderSide: BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.9)),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
@@ -119,8 +117,7 @@ class _MyAppState extends State<MyApp> {
           color: scheme.surface,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(18),
-            side: BorderSide(
-                color: scheme.outlineVariant.withValues(alpha: 0.5)),
+            side: BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.5)),
           ),
           clipBehavior: Clip.antiAlias,
         ),
@@ -130,7 +127,9 @@ class _MyAppState extends State<MyApp> {
   }
 
   Widget _buildHome() {
-    if (!_ready) return const SplashScreen();
+    if (_showSplash) {
+      return const SplashScreen();
+    }
 
     if (_authState.currentUser == null) {
       return AuthScreen(
@@ -142,6 +141,7 @@ class _MyAppState extends State<MyApp> {
     return StoryHomePage(
       authState: _authState,
       currentUser: _authState.currentUser!,
+      seedDemoData: widget.seedDemoData,
       onLogout: _handleLogout,
     );
   }

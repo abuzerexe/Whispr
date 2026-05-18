@@ -1,173 +1,109 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart' as fb;
-
+import '../constants/app_strings.dart';
+import '../data/demo_seed.dart';
+import '../models/experience.dart';
 import '../models/user.dart';
-import '../services/firestore_service.dart';
 import '../utils/anonymous_name.dart';
 
 class AuthState {
-  final _auth = fb.FirebaseAuth.instance;
-  final _firestore = FirestoreService.instance;
+  AuthState({
+    required List<User> seededUsers,
+    this.currentUser,
+  }) : _users = List<User>.from(seededUsers);
 
+  final List<User> _users;
   User? currentUser;
 
-  /// Loads the signed-in Firebase user plus their Firestore profile. If Auth
-  /// has a session but the profile doc is missing, creates it (first-time /
-  /// recovery after rules were fixed).
-  Future<User?> loadCurrentUser() async {
-    final fbUser = _auth.currentUser;
-    if (fbUser == null) return null;
-    final err = await _hydrateProfile(fbUser);
-    if (err != null) {
-      await _auth.signOut();
-      currentUser = null;
-      return null;
-    }
-    return currentUser;
+  final List<Experience> feedExperiences = <Experience>[];
+
+  bool _demoFeedSeeded = false;
+
+  List<User> get users => List<User>.unmodifiable(_users);
+
+  void seedDemoFeedIfNeeded(bool enabled) {
+    if (!enabled || _demoFeedSeeded) return;
+    feedExperiences.addAll(buildGlobalDemoExperiencesForSeedUsers());
+    _demoFeedSeeded = true;
   }
 
-  /// Signs in with email + password. Returns an error string or null on success.
-  Future<String?> login({
-    required String email,
+  User? login({
+    required String identifier,
     required String password,
-  }) async {
-    try {
-      final cred = await _auth.signInWithEmailAndPassword(
-        email: email.trim().toLowerCase(),
-        password: password,
-      );
-      final err = await _hydrateProfile(cred.user!);
-      if (err != null) {
-        await _auth.signOut();
-        currentUser = null;
+  }) {
+    final raw = identifier.trim();
+    if (raw.isEmpty) return null;
+    final asEmail = raw.toLowerCase();
+    for (final user in _users) {
+      final matches =
+          user.username == raw || user.email.toLowerCase() == asEmail;
+      if (matches && user.password == password) {
+        currentUser = user;
+        return user;
       }
-      return err;
-    } on fb.FirebaseAuthException catch (e) {
-      return _errorMessage(e.code);
-    } catch (_) {
-      await _auth.signOut();
-      currentUser = null;
-      return 'Could not finish signing in. Check your connection and try again.';
     }
+    return null;
   }
 
-  /// Creates a Firebase Auth account, generates an anonymous handle, writes the
-  /// user profile to Firestore. Deletes the Auth user if Firestore write fails.
-  Future<String?> signup({
+  User? signup({
     required String username,
     required String email,
     required String password,
-  }) async {
-    fb.UserCredential? cred;
-    try {
-      cred = await _auth.createUserWithEmailAndPassword(
-        email: email.trim().toLowerCase(),
-        password: password,
-      );
-      final uid = cred.user!.uid;
-      final handle = generateAnonymousName(entropy: uid.hashCode);
-      final user = User(
-        id: uid,
-        username: username.trim(),
-        email: email.trim().toLowerCase(),
-        anonymousHandle: handle,
-      );
-      await _firestore.createUser(user);
-      currentUser = user;
-      return null;
-    } on fb.FirebaseAuthException catch (e) {
-      currentUser = null;
-      return _errorMessage(e.code);
-    } on FirebaseException catch (e) {
-      await _rollbackPartialSignup(cred);
-      currentUser = null;
-      return _firestoreMessage(e.code);
-    } catch (_) {
-      await _rollbackPartialSignup(cred);
-      currentUser = null;
-      return 'Could not complete sign-up. Try again.';
-    }
-  }
-
-  Future<void> _rollbackPartialSignup(fb.UserCredential? cred) async {
-    try {
-      await cred?.user?.delete();
-    } catch (_) {
-      /* best-effort */
-    }
-    await _auth.signOut();
-  }
-
-  /// Loads [currentUser] from Firestore or creates the missing profile doc.
-  /// Returns null on success, or an error message.
-  Future<String?> _hydrateProfile(fb.User fbUser) async {
-    try {
-      var profile = await _firestore.getUser(fbUser.uid);
-      profile ??= await _createFirestoreProfileFromAuth(fbUser);
-      currentUser = profile;
-      return null;
-    } on FirebaseException catch (e) {
-      return _firestoreMessage(e.code);
-    } catch (_) {
-      return 'Could not load your profile. Check your connection.';
-    }
-  }
-
-  Future<User> _createFirestoreProfileFromAuth(fb.User fbUser) async {
-    final email = (fbUser.email ?? '').trim().toLowerCase();
-    final localPart = email.split('@').first;
-    final username = localPart.isEmpty ? 'user' : localPart;
+  }) {
+    if (usernameExists(username)) return null;
+    if (emailExists(email)) return null;
+    final id = DateTime.now().microsecondsSinceEpoch.toString();
     final user = User(
-      id: fbUser.uid,
-      username: username,
-      email: email,
-      anonymousHandle: generateAnonymousName(entropy: fbUser.uid.hashCode),
+      id: id,
+      username: username.trim(),
+      email: email.trim().toLowerCase(),
+      password: password,
+      anonymousHandle: generateAnonymousName(entropy: id.hashCode),
     );
-    await _firestore.createUser(user);
+    _users.add(user);
+    currentUser = user;
     return user;
   }
 
-  Future<String?> updateUsernameForCurrentUser(String next) async {
-    final u = currentUser;
-    if (u == null) return 'Not signed in.';
-    final t = next.trim();
-    if (t.isEmpty) return 'Enter a username.';
-    try {
-      await _firestore.updateUsername(u.id, t);
-      u.username = t;
-      return null;
-    } catch (_) {
-      return 'Could not save username. Please try again.';
-    }
+  bool usernameExists(String username) {
+    final u = username.trim().toLowerCase();
+    return _users.any((x) => x.username.toLowerCase() == u);
   }
 
-  Future<String?> changePasswordForCurrentUser({
+  bool emailExists(String email) {
+    final e = email.trim().toLowerCase();
+    if (e.isEmpty) return false;
+    return _users.any((x) => x.email.toLowerCase() == e);
+  }
+
+  String? updateUsernameForCurrentUser(String next) {
+    final u = currentUser;
+    if (u == null) return AppStrings.profileErrorNotSignedIn;
+    final t = next.trim();
+    if (t.isEmpty) return AppStrings.authValidationUsername;
+    if (usernameExists(t) && t.toLowerCase() != u.username.toLowerCase()) {
+      return AppStrings.authValidationUsernameTaken;
+    }
+    u.username = t;
+    return null;
+  }
+
+  String? changePasswordForCurrentUser({
     required String currentPassword,
     required String newPassword,
     required String confirmPassword,
-  }) async {
-    final fbUser = _auth.currentUser;
-    if (fbUser == null) return 'Not signed in.';
-    if (newPassword.length < 6) {
-      return 'Password must be at least 6 characters.';
+  }) {
+    final u = currentUser;
+    if (u == null) return AppStrings.profileErrorNotSignedIn;
+    if (u.password != currentPassword) {
+      return AppStrings.profileErrorWrongPassword;
     }
-    if (newPassword != confirmPassword) return 'Passwords do not match.';
-    try {
-      final cred = fb.EmailAuthProvider.credential(
-        email: fbUser.email!,
-        password: currentPassword,
-      );
-      await fbUser.reauthenticateWithCredential(cred);
-      await fbUser.updatePassword(newPassword);
-      return null;
-    } on fb.FirebaseAuthException catch (e) {
-      return _errorMessage(e.code);
+    if (newPassword.length < 4) {
+      return AppStrings.authValidationPasswordShort;
     }
-  }
-
-  Future<void> logout() async {
-    await _auth.signOut();
-    currentUser = null;
+    if (newPassword != confirmPassword) {
+      return AppStrings.authValidationPasswordMismatch;
+    }
+    u.password = newPassword;
+    return null;
   }
 
   static bool isValidEmailFormat(String raw) {
@@ -175,46 +111,7 @@ class AuthState {
     return e.contains('@') && e.length > 4 && e.split('@').length == 2;
   }
 
-  static String _firestoreMessage(String code) {
-    switch (code) {
-      case 'permission-denied':
-        return 'Firestore blocked this request (check security rules in '
-            'Firebase Console).';
-      case 'unavailable':
-        return 'The service is temporarily unavailable. Try again.';
-      case 'failed-precondition':
-      case 'not-found':
-        return 'Firestore may not be enabled for this project. In Firebase '
-            'Console → Build → Firestore Database → Create database.';
-      default:
-        return 'Could not sync with the server.';
-    }
-  }
-
-  static String _errorMessage(String code) {
-    switch (code) {
-      case 'email-already-in-use':
-        return 'An account with this email already exists.';
-      case 'invalid-email':
-        return 'Invalid email address.';
-      case 'weak-password':
-        return 'Password is too weak (min 6 characters).';
-      case 'user-not-found':
-      case 'wrong-password':
-      case 'invalid-credential':
-        return 'Invalid email or password.';
-      case 'too-many-requests':
-        return 'Too many attempts. Please try again later.';
-      case 'operation-not-allowed':
-        return 'Email/Password sign-in is not enabled. Enable it in '
-            'Firebase Console → Authentication → Sign-in method.';
-      case 'network-request-failed':
-        return 'Network error. Check your internet connection.';
-      case 'configuration-not-found':
-        return 'Firebase project not configured correctly. Check your '
-            'Firebase Console settings.';
-      default:
-        return 'Authentication failed ($code). Please try again.';
-    }
+  void logout() {
+    currentUser = null;
   }
 }

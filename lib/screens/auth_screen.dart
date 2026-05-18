@@ -20,13 +20,10 @@ class AuthScreen extends StatefulWidget {
 
 class _AuthScreenState extends State<AuthScreen> {
   bool _isLogin = true;
-  bool _loading = false;
-
-  final _usernameController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _confirmController = TextEditingController();
-
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmController = TextEditingController();
   String? _error;
 
   @override
@@ -42,69 +39,38 @@ class _AuthScreenState extends State<AuthScreen> {
     setState(() {
       _isLogin = login;
       _error = null;
-      _usernameController.clear();
-      _emailController.clear();
       _passwordController.clear();
       _confirmController.clear();
+      _emailController.clear();
     });
   }
 
-  Future<void> _submit() async {
+  void _submit() {
+    final username = _usernameController.text.trim();
     final password = _passwordController.text;
-
-    if (_isLogin) {
-      final email = _emailController.text.trim();
-      if (email.isEmpty) {
-        setState(() => _error = AppStrings.authValidationEmail);
-        return;
-      }
-      if (!AuthState.isValidEmailFormat(email)) {
-        setState(() => _error = AppStrings.authValidationEmailInvalid);
-        return;
-      }
-      if (password.isEmpty) {
-        setState(() => _error = AppStrings.authValidationPassword);
-        return;
-      }
-
-      setState(() {
-        _loading = true;
-        _error = null;
-      });
-      try {
-        final err = await widget.authState.login(
-          email: email,
-          password: password,
-        );
-        if (!mounted) return;
-        if (err != null) {
-          setState(() {
-            _loading = false;
-            _error = err;
-          });
-          return;
-        }
-        if (widget.authState.currentUser == null) {
-          setState(() {
-            _loading = false;
-            _error = AppStrings.authProfileLoadFailed;
-          });
-          return;
-        }
-        setState(() => _loading = false);
-        widget.onAuthenticated();
-      } catch (_) {
-        if (!mounted) return;
-        setState(() {
-          _loading = false;
-          _error = AppStrings.authUnexpectedError;
-        });
-      }
+    if (password.isEmpty) {
+      setState(() => _error = AppStrings.authValidationPassword);
+      return;
+    }
+    if (password.length < 4) {
+      setState(() => _error = AppStrings.authValidationPasswordShort);
       return;
     }
 
-    // ── Sign-up ──────────────────────────────────────────────────────────────
-    final username = _usernameController.text.trim();
+    if (_isLogin) {
+      if (username.isEmpty) {
+        setState(() => _error = AppStrings.authValidationLoginIdentifier);
+        return;
+      }
+      final user = widget.authState.login(identifier: username, password: password);
+      if (user == null) {
+        setState(() => _error = AppStrings.authLoginFailed);
+        return;
+      }
+      widget.onAuthenticated();
+      return;
+    }
+
     if (username.isEmpty) {
       setState(() => _error = AppStrings.authValidationUsername);
       return;
@@ -120,62 +86,35 @@ class _AuthScreenState extends State<AuthScreen> {
       return;
     }
 
-    if (password.isEmpty) {
-      setState(() => _error = AppStrings.authValidationPassword);
-      return;
-    }
-    if (password.length < 6) {
-      setState(() => _error = AppStrings.authValidationPasswordShort);
-      return;
-    }
-
     final confirm = _confirmController.text;
     if (password != confirm) {
       setState(() => _error = AppStrings.authValidationPasswordMismatch);
       return;
     }
-
-    setState(() {
-      _loading = true;
-      _error = null;
-    });
-    try {
-      final err = await widget.authState.signup(
-        username: username,
-        email: email,
-        password: password,
-      );
-      if (!mounted) return;
-      if (err != null) {
-        setState(() {
-          _loading = false;
-          _error = err;
-        });
-        return;
-      }
-      if (widget.authState.currentUser == null) {
-        setState(() {
-          _loading = false;
-          _error = AppStrings.authProfileLoadFailed;
-        });
-        return;
-      }
-      setState(() => _loading = false);
-      widget.onAuthenticated();
-    } catch (_) {
-      if (!mounted) return;
-      setState(() {
-        _loading = false;
-        _error = AppStrings.authUnexpectedError;
-      });
+    if (widget.authState.usernameExists(username)) {
+      setState(() => _error = AppStrings.authValidationUsernameTaken);
+      return;
     }
+    if (widget.authState.emailExists(email)) {
+      setState(() => _error = AppStrings.authValidationEmailTaken);
+      return;
+    }
+    final created = widget.authState.signup(
+      username: username,
+      email: email,
+      password: password,
+    );
+    if (created == null) {
+      setState(() => _error = AppStrings.authValidationUsernameTaken);
+      return;
+    }
+    widget.onAuthenticated();
   }
 
   @override
   Widget build(BuildContext context) {
     final title = _isLogin ? AppStrings.authLoginTab : AppStrings.authSignupTab;
-    final button =
-        _isLogin ? AppStrings.authLoginButton : AppStrings.authSignupButton;
+    final button = _isLogin ? AppStrings.authLoginButton : AppStrings.authSignupButton;
     final scheme = Theme.of(context).colorScheme;
     final theme = Theme.of(context);
 
@@ -183,8 +122,7 @@ class _AuthScreenState extends State<AuthScreen> {
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 420),
               child: AppSurfaceCard(
@@ -213,57 +151,48 @@ class _AuthScreenState extends State<AuthScreen> {
                       ),
                     ),
                     const SizedBox(height: 22),
-
-                    // Username — signup only
-                    if (!_isLogin) ...[
-                      TextField(
-                        key: const Key('auth_username_field'),
-                        controller: _usernameController,
-                        autocorrect: false,
-                        enabled: !_loading,
-                        decoration: const InputDecoration(
-                          hintText: AppStrings.authUsernameHint,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                    ],
-
-                    // Email — always shown
                     TextField(
-                      key: const Key('auth_email_field'),
-                      controller: _emailController,
-                      keyboardType: TextInputType.emailAddress,
+                      key: const Key('auth_username_field'),
+                      controller: _usernameController,
                       autocorrect: false,
-                      enabled: !_loading,
-                      decoration: const InputDecoration(
-                        hintText: AppStrings.authEmailHint,
+                      decoration: InputDecoration(
+                        hintText: _isLogin
+                            ? AppStrings.authLoginIdentifierHint
+                            : AppStrings.authUsernameHint,
                       ),
                     ),
+                    if (!_isLogin) ...[
+                      const SizedBox(height: 12),
+                      TextField(
+                        key: const Key('auth_email_field'),
+                        controller: _emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        autocorrect: false,
+                        decoration: const InputDecoration(
+                          hintText: AppStrings.authEmailHint,
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 12),
-
                     TextField(
                       key: const Key('auth_password_field'),
                       controller: _passwordController,
                       obscureText: true,
-                      enabled: !_loading,
                       decoration: const InputDecoration(
                         hintText: AppStrings.authPasswordHint,
                       ),
                     ),
-
                     if (!_isLogin) ...[
                       const SizedBox(height: 12),
                       TextField(
                         key: const Key('auth_confirm_field'),
                         controller: _confirmController,
                         obscureText: true,
-                        enabled: !_loading,
                         decoration: const InputDecoration(
                           hintText: AppStrings.authConfirmPasswordHint,
                         ),
                       ),
                     ],
-
                     if (_error != null) ...[
                       const SizedBox(height: 14),
                       Text(
@@ -277,27 +206,21 @@ class _AuthScreenState extends State<AuthScreen> {
                     const SizedBox(height: 20),
                     FilledButton(
                       key: const Key('auth_submit_button'),
-                      onPressed: _loading ? null : _submit,
+                      onPressed: _submit,
                       style: FilledButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
                         ),
                       ),
-                      child: _loading
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : Text(button),
+                      child: Text(button),
                     ),
                     const SizedBox(height: 6),
                     Align(
                       alignment: Alignment.center,
                       child: TextButton(
                         key: const Key('auth_toggle_mode_button'),
-                        onPressed: _loading ? null : () => _setMode(!_isLogin),
+                        onPressed: () => _setMode(!_isLogin),
                         child: Text(
                           _isLogin
                               ? AppStrings.authSwitchToSignup

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../models/experience.dart';
-import 'topic_badge.dart';
 
 const int kFeedTitleMaxLines = 2;
 const int kFeedBodyMaxLines = 4;
@@ -91,10 +90,6 @@ class ExperienceCard extends StatelessWidget {
                   maxLines: kFeedTitleMaxLines,
                   overflow: TextOverflow.ellipsis,
                 ),
-                if (experience.hasTopic) ...[
-                  const SizedBox(height: 8),
-                  TopicBadge(experience: experience, compact: true),
-                ],
                 const SizedBox(height: 10),
                 Text(
                   experience.body,
@@ -105,41 +100,6 @@ class ExperienceCard extends StatelessWidget {
                   maxLines: kFeedBodyMaxLines,
                   overflow: TextOverflow.ellipsis,
                 ),
-                if (experience.upvoteCount > 0 ||
-                    experience.downvoteCount > 0) ...[
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.arrow_upward_rounded,
-                        size: 16,
-                        color: scheme.primary.withValues(alpha: 0.85),
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${experience.upvoteCount}',
-                        style: theme.textTheme.labelLarge?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: scheme.primary,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Icon(
-                        Icons.arrow_downward_rounded,
-                        size: 16,
-                        color: scheme.error.withValues(alpha: 0.85),
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${experience.downvoteCount}',
-                        style: theme.textTheme.labelLarge?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: scheme.error,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
               ],
             ),
           ),

@@ -1,15 +1,10 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 
 import '../constants/app_strings.dart';
 import '../models/experience.dart';
 import '../models/user.dart';
-import '../services/firestore_service.dart';
 import '../state/auth_state.dart';
 import '../utils/feed_query.dart';
-import '../widgets/topic_filter_bar.dart';
-import 'analytics/analytics_screen.dart';
 import 'compose_screen.dart';
 import 'experience_detail_screen.dart';
 import 'feed_screen.dart';
@@ -23,11 +18,13 @@ class StoryHomePage extends StatefulWidget {
     required this.authState,
     required this.currentUser,
     required this.onLogout,
+    this.seedDemoData = false,
   });
 
   final AuthState authState;
   final User currentUser;
   final VoidCallback onLogout;
+  final bool seedDemoData;
 
   @override
   State<StoryHomePage> createState() => _StoryHomePageState();
@@ -39,31 +36,14 @@ class _StoryHomePageState extends State<StoryHomePage> {
   bool _newestFirst = true;
   _ShellOverlay _overlay = _ShellOverlay.none;
   Experience? _detailExperience;
-  String? _selectedTopicId;
 
-  List<Experience> _experiences = [];
-  StreamSubscription<List<Experience>>? _expSub;
+  List<Experience> get _experiences => widget.authState.feedExperiences;
 
   @override
   void initState() {
     super.initState();
+    widget.authState.seedDemoFeedIfNeeded(widget.seedDemoData);
     _searchController.addListener(() => setState(() {}));
-    _subscribeExperiences();
-  }
-
-  void _subscribeExperiences() {
-    _expSub?.cancel();
-    final topicId = _sectionIndex == 0 ? _selectedTopicId : null;
-    _expSub = FirestoreService.instance
-        .experiencesStream(topicId: topicId)
-        .listen((list) {
-      if (mounted) setState(() => _experiences = list);
-    });
-  }
-
-  void _onTopicFilterChanged(String? topicId) {
-    setState(() => _selectedTopicId = topicId);
-    _subscribeExperiences();
   }
 
   @override
@@ -74,15 +54,12 @@ class _StoryHomePageState extends State<StoryHomePage> {
       _searchController.clear();
       _overlay = _ShellOverlay.none;
       _detailExperience = null;
-      _selectedTopicId = null;
-      _subscribeExperiences();
       setState(() {});
     }
   }
 
   @override
   void dispose() {
-    _expSub?.cancel();
     _searchController.dispose();
     super.dispose();
   }
@@ -95,8 +72,7 @@ class _StoryHomePageState extends State<StoryHomePage> {
   }
 
   List<Experience> get _feedExperiences {
-    final filtered =
-        filterExperiencesBySearch(_tabExperiences, _searchController.text);
+    final filtered = filterExperiencesBySearch(_tabExperiences, _searchController.text);
     return sortExperiencesByDate(filtered, newestFirst: _newestFirst);
   }
 
@@ -121,7 +97,9 @@ class _StoryHomePageState extends State<StoryHomePage> {
     final wasCompose = _overlay == _ShellOverlay.compose;
     final shared = result == true;
     setState(() {
-      if (_overlay == _ShellOverlay.detail) _detailExperience = null;
+      if (_overlay == _ShellOverlay.detail) {
+        _detailExperience = null;
+      }
       _overlay = _ShellOverlay.none;
     });
     if (wasCompose && shared && mounted) {
@@ -135,12 +113,8 @@ class _StoryHomePageState extends State<StoryHomePage> {
     return true;
   }
 
-  void _openCompose() => setState(() => _overlay = _ShellOverlay.compose);
-
-  void _openAnalytics() {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(builder: (_) => const AnalyticsScreen()),
-    );
+  void _openCompose() {
+    setState(() => _overlay = _ShellOverlay.compose);
   }
 
   void _openDetail(Experience experience) {
@@ -151,23 +125,15 @@ class _StoryHomePageState extends State<StoryHomePage> {
   }
 
   void _removeExperience(Experience experience) {
-    FirestoreService.instance.deleteExperience(experience.id);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text(AppStrings.snackStoryRemoved)),
-    );
-  }
-
-  void _onPostDeletedFromDetail() {
     setState(() {
-      _detailExperience = null;
-      _overlay = _ShellOverlay.none;
+      _experiences.removeWhere((e) => e.id == experience.id);
     });
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text(AppStrings.snackStoryRemoved)),
     );
   }
 
-  PreferredSizeWidget get _searchBarBottom {
+  PreferredSizeWidget? get _searchBarBottom {
     return PreferredSize(
       preferredSize: const Size.fromHeight(48),
       child: Padding(
@@ -177,8 +143,7 @@ class _StoryHomePageState extends State<StoryHomePage> {
           decoration: InputDecoration(
             hintText: AppStrings.searchHint,
             filled: true,
-            fillColor:
-                Theme.of(context).colorScheme.surfaceContainerHighest,
+            fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide.none,
@@ -201,7 +166,7 @@ class _StoryHomePageState extends State<StoryHomePage> {
     );
   }
 
-  PreferredSizeWidget get _profileAppBar {
+  PreferredSizeWidget? get _profileAppBar {
     return AppBar(
       title: const Text(AppStrings.profileTitle),
       backgroundColor: Theme.of(context).colorScheme.inversePrimary,
@@ -215,17 +180,12 @@ class _StoryHomePageState extends State<StoryHomePage> {
     );
   }
 
-  PreferredSizeWidget get _homeAppBar {
+  PreferredSizeWidget? get _homeAppBar {
     return AppBar(
       title: const Text(AppStrings.homeAppBarTitle),
       backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       bottom: _searchBarBottom,
       actions: [
-        IconButton(
-          tooltip: AppStrings.analyticsTooltip,
-          onPressed: _openAnalytics,
-          icon: const Icon(Icons.bar_chart_rounded),
-        ),
         IconButton(
           tooltip: _newestFirst
               ? AppStrings.sortNewestTooltip
@@ -237,32 +197,6 @@ class _StoryHomePageState extends State<StoryHomePage> {
           tooltip: AppStrings.authLogoutTooltip,
           onPressed: _logoutFromShell,
           icon: const Icon(Icons.logout),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildFeedWithTopicBar() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        if (_sectionIndex == 0) ...[
-          const SizedBox(height: 8),
-          TopicFilterBar(
-            selectedTopicId: _selectedTopicId,
-            onTopicSelected: _onTopicFilterChanged,
-          ),
-          const SizedBox(height: 4),
-        ],
-        Expanded(
-          child: FeedScreen(
-            experiences: _feedExperiences,
-            sessionUserId: widget.currentUser.id,
-            onExperienceTap: _openDetail,
-            onDismissOwnExperience: _removeExperience,
-            showMyPostsEmptyMessage: _sectionIndex == 1,
-            showNoSearchResults: _showSearchEmpty,
-          ),
         ),
       ],
     );
@@ -285,7 +219,14 @@ class _StoryHomePageState extends State<StoryHomePage> {
               pages: [
                 MaterialPage<void>(
                   key: const ValueKey<String>('shell_feed'),
-                  child: _buildFeedWithTopicBar(),
+                  child: FeedScreen(
+                    experiences: _feedExperiences,
+                    sessionUserId: widget.currentUser.id,
+                    onExperienceTap: _openDetail,
+                    onDismissOwnExperience: _removeExperience,
+                    showMyPostsEmptyMessage: _sectionIndex == 1,
+                    showNoSearchResults: _showSearchEmpty,
+                  ),
                 ),
                 if (_overlay == _ShellOverlay.compose)
                   MaterialPage<void>(
@@ -294,19 +235,23 @@ class _StoryHomePageState extends State<StoryHomePage> {
                       ownerUserId: widget.currentUser.id,
                       authorHandle: widget.currentUser.anonymousHandle,
                       onLogout: _logoutFromShell,
+                      onAddExperience: (Experience e) {
+                        setState(() => _experiences.insert(0, e));
+                      },
                     ),
                   ),
-                if (_overlay == _ShellOverlay.detail &&
-                    _detailExperience != null)
+                if (_overlay == _ShellOverlay.detail && _detailExperience != null)
                   MaterialPage<void>(
-                    key: ValueKey<String>(
-                        'shell_detail_${_detailExperience!.id}'),
+                    key: ValueKey<String>('shell_detail_${_detailExperience!.id}'),
                     child: ExperienceDetailScreen(
                       experience: _detailExperience!,
                       sessionUserId: widget.currentUser.id,
                       sessionAuthorHandle: widget.currentUser.anonymousHandle,
                       onLogout: _logoutFromShell,
-                      onPostDeleted: _onPostDeletedFromDetail,
+                      onAddComment: (comment) {
+                        _detailExperience!.comments.add(comment);
+                        setState(() {});
+                      },
                     ),
                   ),
               ],
@@ -329,7 +274,6 @@ class _StoryHomePageState extends State<StoryHomePage> {
             _overlay = _ShellOverlay.none;
             _detailExperience = null;
           });
-          _subscribeExperiences();
         },
         destinations: const [
           NavigationDestination(
